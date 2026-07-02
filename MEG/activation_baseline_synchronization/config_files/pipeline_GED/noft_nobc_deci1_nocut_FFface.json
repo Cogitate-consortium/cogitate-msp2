@@ -1,0 +1,14 @@
+{
+    "GED_type": "FFface",
+    "roi":"FF",
+    "epoch_data_list": ["dAT_all","replay_all"],
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "GEDpref_stim": "face",
+    "cond_GEDpref_select_columns": ["Stimuli_type"],
+    "cond_GEDpref_content_list":[["Face"]],
+    "cond_GEDpref_tw"  :[0,0.5],
+    "cond_noGEDpref_tw":[0,0.5],
+    "GEDirre_stim": "object",
+    "cond_GEDirre_select_columns": ["Stimuli_type"],
+    "cond_GEDirre_content_list": [["Object"]]
+}

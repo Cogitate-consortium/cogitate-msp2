@@ -1,0 +1,9 @@
+{
+    "corresponding_sub_check_meg_list"   :[ "rng_fs", "rng_os"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"rng_fs-rng_os" ,
+    "epoch_data_name":"AT_nontarget",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "GED_types":["PFCact","FFface","FFobje"],
+    "GED_metadata_epochtype":"default_noft_nobc"
+}

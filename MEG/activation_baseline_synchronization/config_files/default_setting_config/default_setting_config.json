@@ -1,0 +1,168 @@
+{
+    "source_construction_method_mne_dspm":{
+        "inv_method": "dspm",
+        "stc_method": "dSPM",
+        "pick_ori": "normal",
+        "snr": 3
+    },
+    "epoch_noft_nobc_deci5_nocut": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_noft_nobc_deci5_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_noft_nobc_deci1_nocut": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    },
+    "epoch_noft_nobc_deci1_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    },
+    "epoch_noft_bcpre500_pre300_deci5_nocut": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_noft_bcpre500_pre300_deci5_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_noft_bcpre500_pre300_deci1_nocut": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    },
+    "epoch_noft_bcpre500_pre300_deci1_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": "None",
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_nobc_deci5_nocut": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_nobc_deci5_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_nobc_deci1_nocut": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_nobc_deci1_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": "None",
+        "baseline_off": "None",
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_bcpre500_pre300_deci5_nocut": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_bcpre500_pre300_deci5_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 5,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_bcpre500_pre300_deci1_nocut": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": "None",
+        "cut_off": "None",
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    },
+    "epoch_ftN_40_bcpre500_pre300_deci1_cutpre1000_1000": {
+        "l_freq": "None",
+        "h_freq": 40,
+        "baseline_on": -0.5,
+        "baseline_off": -0.3,
+        "cut_on": -1,
+        "cut_off": 1,
+        "epoch_decim": 1,
+        "active_win": [0, 0.5]
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "corresponding_sub_check_list"   :[  "SYNCHRONY_min_seen"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_lists"   :[[ "vg_fs", "vg_os"],[ "vg_fu", "vg_ou"]],
+    "corresponding_sub_check_meg_list_logics" : ["or","or"],
+    "sub_list_name":"ACTIVATION_stim-vg_ss-vg_su",
+    "compare_trltypes": "Seen_Unseen",
+    "compare_trltypes_select_column": "Response",
+    "cond1_content_name": "StimSeen",
+    "cond2_content_name": "StimUnseen",
+    "cond1_content_list": ["Seen"],
+    "cond2_content_list": ["Unseen"],
+    "epoch_data_name": "dAT_probestim",
+    "epoch_setting_name":"ft_bc_deci1_nocut"
+}

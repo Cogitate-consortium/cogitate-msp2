@@ -1,0 +1,18 @@
+{
+    "corresponding_sub_check_list"   :[ "SYNCHRONY_min_seen"],
+    "corresponding_sub_check_list_logic" : "or",
+    "tail":1,
+    "band_name": "gamma",
+    "epoch_data_name": "dAT_all",
+    "saved_roi_list_name": "FF_obje_select_vertices_highergamma",
+    "compare_trltypes": "SeenObjc_SeenFace",
+    "compare_trltypes_select_columns": ["Response","Stimuli_type"],
+    "cond1_name": "dATseenObje",
+    "cond2_name": "dATseenFace",
+    "cond1_content": [["Seen"],["Object"]],
+    "cond2_content": [["Seen"],["Face"]],
+    "cond1_tw": [0,0.5],
+    "cond2_tw": [0,0.5],
+    "roi": "FF",
+    "cbpt_params_name": "cbpt_source"
+}

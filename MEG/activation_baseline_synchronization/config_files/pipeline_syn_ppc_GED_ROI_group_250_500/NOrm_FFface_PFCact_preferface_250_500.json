@@ -1,0 +1,11 @@
+{       
+    "tail":1,
+    "cond1_timewindow": [0.25,0.5],
+    "cond2_timewindow": [0.25,0.5],
+    "cbpt_params_name": "cbpt_source",
+    "input_type":"NOrm",
+    "ROIpairs_name":"FFface_PFCact",
+    "cond1": "facetrl",
+    "cond2": "objetrl",
+    "individual_configfile_contain_either_list": ["allseen","AT_nontarget","AT_target","dAT_probeseen"]
+}

@@ -1,0 +1,29 @@
+{
+    "corresponding_sub_check_meg_list"   :[ "rng_fs", "rng_os"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "corresponding_sub_check_vertROI_list"   :[ "vertFFface","vertV1V2actVbas","vertFFobje"],
+    "corresponding_sub_check_vertROI_list_logic" : "and",
+    "sub_list_name":"rng_fs-rng_os-vertFFface-vertV1V2actVbas-vertFFobje" ,
+    "epoch_data_name":"AT_nontarget",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "trl_types"  : ["facetrl",
+                    "objetrl"],
+    "trl_select_columns":   [
+                             ["Stimuli_type"],
+                             ["Stimuli_type"]],
+    "trl_select_conditions":[[["Face"]],
+                            [["Object"]]
+                           ],
+    "ROIpairs_dict":{
+        "vertFFface_vertV1V2actVbas":{
+            "signal1":"vertFFface",
+            "signal2":"vertV1V2actVbas"
+        },
+        "vertFFobje_vertV1V2actVbas":{
+            "signal1":"vertFFobje",
+            "signal2":"vertV1V2actVbas"
+        }
+    },
+    "tfr_method":"cwt_morlet",
+    "freq_range_name":"2_100"
+}

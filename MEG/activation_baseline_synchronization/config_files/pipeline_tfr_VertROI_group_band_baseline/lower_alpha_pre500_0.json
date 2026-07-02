@@ -1,0 +1,8 @@
+{       
+    "band_name":"alpha",
+    "tail":-1,
+    "individual_configfile_contain_list": ["probe_stim","vertFFstiVbla","1_30"],
+    "cond1_timewindow": [-0.5,0],
+    "cond2_timewindow": [-0.5,0],
+    "cbpt_params_name": "cbpt_source"
+}

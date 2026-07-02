@@ -1,0 +1,461 @@
+{
+    "sub_no_T1": ["SA101","SA102", "SA104", "SA110", "SA111", "SA152"],
+    "source_method_setting":{
+        "active_win"  : [0,0.5],
+        "inv_method": "dspm",
+        "stc_method": "dSPM",
+        "pick_ori": "normal",
+        "snr": 3
+},
+    "epoch_setting_dict":{
+        "ft30_nobc_deci1_nocut": {
+            "l_freq": "None",
+            "h_freq":  30,
+            "baseline_on": "None",
+            "baseline_off": "None",
+            "cut_on": "None",
+            "cut_off": "None",
+            "epoch_decim"  : 1
+        },
+        "ft30_nobc_deci5_nocut": {
+            "l_freq": "None",
+            "h_freq":  30,
+            "baseline_on": "None",
+            "baseline_off": "None",
+            "cut_on": "None",
+            "cut_off": "None",
+            "epoch_decim"  : 5
+        },
+        "ft30_bc_deci5_nocut": {
+            "l_freq": "None",
+            "h_freq":  30,
+            "baseline_on":-0.5,
+            "baseline_off":-0.3,
+            "cut_on": "None",
+            "cut_off": "None",
+            "epoch_decim"  : 5
+        },
+        "ft_bc_deci1_nocut":{
+                "l_freq": "None",
+                "h_freq":  40,
+                "baseline_on":-0.5,
+                "baseline_off":-0.3,
+                "cut_on": "None",
+                "cut_off": "None",
+                "epoch_decim"  : 1
+                },        
+        "ft_bc_deci1_cutpre1000_1000":{
+            "l_freq": "None",
+            "h_freq":  40,
+            "baseline_on":-0.5,
+            "baseline_off":-0.3,
+            "cut_on": -1,
+            "cut_off": 1,
+            "epoch_decim"  : 1
+            },
+        "ft_bc_deci5_cutpre1000_1000":{
+            "l_freq": "None",
+            "h_freq":  40,
+            "baseline_on":-0.5,
+            "baseline_off":-0.3,
+            "cut_on": -1,
+            "cut_off": 1,
+            "epoch_decim"  : 5
+            },
+        "ft_nobc_deci1_nocut":{
+            "l_freq": "None",
+            "h_freq":  40,
+            "baseline_on":"None",
+            "baseline_off":"None",
+            "cut_on": "None",
+            "cut_off": "None",
+            "epoch_decim"  : 1
+            },
+        "ft_nobc_deci5_nocut":{
+                "l_freq": "None",
+                "h_freq":  40,
+                "baseline_on":"None",
+                "baseline_off":"None",
+                "cut_on": "None",
+                "cut_off": "None",
+                "epoch_decim"  : 5
+                },
+        "ft_nobc_deci1_cutpre1000_1000":{
+            "l_freq": "None",
+            "h_freq":  40,
+            "baseline_on":"None",
+            "baseline_off":"None",
+            "cut_on": -1,
+            "cut_off": 1,
+            "epoch_decim"  : 1
+            },
+        "ft_nobc_deci5_cutpre1000_1000":{
+            "l_freq": "None",
+            "h_freq":  40,
+            "baseline_on":"None",
+            "baseline_off":"None",
+            "cut_on": -1,
+            "cut_off": 1,
+            "epoch_decim"  : 5
+            },
+        "noft_bc_deci5_nocut":{
+            "l_freq": "None",
+            "h_freq": "None",
+            "baseline_on":-0.5,
+            "baseline_off":-0.3,
+            "cut_on": "None",
+            "cut_off": "None",
+            "epoch_decim"  : 5
+            },
+        "noft_nobc_deci1_nocut":{
+            "l_freq": "None",
+            "h_freq": "None",
+            "baseline_on":"None",
+            "baseline_off":"None",
+            "cut_on": "None",
+            "cut_off": "None",
+            "epoch_decim"  : 1
+            },
+        "noft_nobc_deci5_nocut":{
+            "l_freq": "None",
+            "h_freq": "None",
+            "baseline_on":"None",
+            "baseline_off":"None",
+            "cut_on": "None",
+            "cut_off": "None",
+            "epoch_decim"  : 5
+            },
+        "noft_nobc_deci1_cutpre1000_1000":{
+                "l_freq": "None",
+                "h_freq": "None",
+                "baseline_on":"None",
+                "baseline_off":"None",
+                "cut_on": -1,
+                "cut_off": 1,
+                "epoch_decim"  : 1
+                },
+        "noft_nobc_deci5_cutpre1000_1000":{
+                "l_freq": "None",
+                "h_freq": "None",
+                "baseline_on":"None",
+                "baseline_off":"None",
+                "cut_on": -1,
+                "cut_off": 1,
+                "epoch_decim"  : 5
+                },
+        "noft_bc_deci1_nocut":{
+                "l_freq": "None",
+                "h_freq": "None",
+                "baseline_on":-0.5,
+                "baseline_off":-0.3,
+                "cut_on": "None",
+                "cut_off": "None",
+                "epoch_decim"  : 1
+                }
+        
+    },
+    "epoch_data_dict": {
+        "replay_all": {
+            "exp_id": "V2",
+            "task_id": "replay",
+            "trl_condition": "None"
+        },
+        "AT_target": {
+            "exp_id": "V2",
+            "task_id": "replay",
+            "trl_condition": "Trial_type.fillna('no') == 'Target' "
+        },
+        "AT_nontarget": {
+            "exp_id": "V2",
+            "task_id": "replay",
+            "trl_condition": "Trial_type.fillna('no') == 'Non-Target' "
+        },
+        "dAT_all": {
+            "exp_id": "V2",
+            "task_id": "vg",
+            "trl_condition": "None"
+        },
+        "dAT_probe":{
+            "exp_id": "V2",
+            "task_id": "vg",
+            "trl_condition":  "Trial_type== 'Probe' "
+        },
+        "dAT_probeseen": {
+            "exp_id": "V2",
+            "task_id": "vg",
+            "trl_condition": "Trial_type== 'Probe' and Stimuli_type!='Blank' and Response == 'Seen'"
+        },
+        "dAT_probestim": {
+            "exp_id": "V2",
+            "task_id": "vg",
+            "trl_condition": "Trial_type== 'Probe' and Stimuli_type!='Blank'"
+        },
+        "dAT_probeface": {
+            "exp_id": "V2",
+            "task_id": "vg",
+            "trl_condition":  "Trial_type== 'Probe' and Stimuli_type=='Face'",
+            "trl_condition_check"  : "assert(set(eps_use.metadata['Stimuli_type'].unique())==set(['Face']))"
+        }, 
+        "dAT_probeobje": {
+            "exp_id": "V2",
+            "task_id": "vg",
+            "trl_condition"  :  "Trial_type== 'Probe' and Stimuli_type=='Object'",
+            "trl_condition_check"  : "assert(set(eps_use.metadata['Stimuli_type'].unique())==set(['Object']))"
+        }
+    },
+    "roi_params_dict": {
+        "FF": {
+            "parc": "aparc",
+            "label_name": "ff",
+            "labels_list": ["fusifor"],
+            "rois_list": []
+        }, 
+        "V1V2": {
+            "parc": "wang2015_mplbl",
+            "label_name": "v1v2",
+            "labels_list": [],
+            "rois_list": ["iit_wang"]
+        },
+        "PFC": {
+                "parc": "aparc.a2009s",
+                "label_name": "pfc",
+                "labels_list": [],
+                "rois_list": ["gnw"]
+            },
+        "POS": {
+            "parc": "aparc.a2009s",
+            "label_name": "pos",
+            "labels_list": [],
+            "rois_list": ["iit_1"]
+        }
+    },
+    "VertROI_params_dict": {
+        "FF_face_select_vertices": {
+            "parc": "aparc",
+            "label_name": "vertFFface",
+            "labels_list": [],
+            "rois_list": ["FF_face_select_vertices"]
+                },
+        "FF_obje_select_vertices": {
+            "parc": "aparc",
+            "label_name": "vertFFobje",
+            "labels_list": [],
+            "rois_list": ["FF_obje_select_vertices"],
+            "short_name":"FFobje"
+        },
+        "FF_responsive_stim_vs_blank_vertices": {
+            "parc": "aparc",
+            "label_name": "vertFFstiVbla",
+            "labels_list": [],
+            "rois_list": ["FF_responsive_stim_vs_blank_vertices"]
+        },
+        "V1V2_responsive_activewin_vs_baseline_vertices": {
+            "parc": "wang2015_mplbl",
+            "label_name": "vertV1V2actVbas",
+            "labels_list": [],
+            "rois_list": ["V1V2_responsive_activewin_vs_baseline_vertices"]
+        }},
+    "GED_params_dict":{
+        "default_noft_nobc":{
+        "FFface": {
+            "ged_subfolder": "noft_nobc_deci1_nocut",
+            "GED_ROI":"FF"
+        }, 
+        "FFobje": {
+            "ged_subfolder": "noft_nobc_deci1_nocut",
+            "GED_ROI":"FF"
+        },
+        "PFCact": {
+            "ged_subfolder": "ftN_30_nobc_deci1_nocut",
+            "GED_ROI":"PFC"
+        }},
+        "testing_bc":{
+        "FFface": {
+            "ged_subfolder": "ft_bc_deci1_nocut",
+            "GED_ROI":"FF"
+        }, 
+        "FFobje": {
+            "ged_subfolder": "ft_bc_deci1_nocut",
+            "GED_ROI":"FF"
+        },
+        "PFCact": {
+            "ged_subfolder": "ftN_30_nobc_deci1_nocut",
+            "GED_ROI":"PFC"
+        }}
+    },
+    "timecourse_data_dict":{
+        "FFface": {
+            "roi":"FF",
+            "timecourse_folder": "pipeline_syn_timecourse_GED_ROI"
+        }, 
+        "FFobje": {
+            "roi":"FF",
+            "timecourse_folder": "pipeline_syn_timecourse_GED_ROI"
+        },
+        "PFCact": {
+            "roi":"PFC",
+            "timecourse_folder": "pipeline_syn_timecourse_GED_ROI"
+            
+        },
+        "vertFFface": {
+            "roi":"FF_face_select_vertices",
+            "timecourse_folder": "pipeline_syn_timecourse_PCA_VertROI"
+        },
+        "vertFFobje": {
+            "roi":"FF_obje_select_vertices",
+            "timecourse_folder": "pipeline_syn_timecourse_PCA_VertROI"
+        },
+        "vertV1V2actVbas": {
+            "roi":"V1V2_responsive_activewin_vs_baseline_vertices",
+            "timecourse_folder": "pipeline_syn_timecourse_PCA_VertROI"
+        }
+    },
+    "band_map": {
+        "gamma": {
+            "freqs": [   
+            60, 62, 64, 66, 68,   
+            70, 72, 74, 76, 78,   
+            80, 82, 84, 86, 88, 90],
+            "n_cycles": [
+                15 ,15.5,16 ,16.5,17,
+                17.5,18,18.5,19,19.5, 
+                20,20.5,21,21.5,22 ,22.5],
+            "decim": 1
+        },
+        "alpha": {
+            "freqs":    [ 8,  9, 10, 11,   12, 13],
+            "n_cycles": [4 , 4.5, 5 , 5.5, 6 , 6.5],
+            "decim": 1
+        }
+    },
+    "tfr_map_dict": {
+    "multitaper":{
+      "slow_1_30": {
+        "freqs":    [   1,  2,  3,   4,   5,   6,   7,   8,  9, 10, 
+                        11,   12,  13,  14,  15, 16, 17, 18, 19, 20,
+                        21,   22,   23,  24,  25,  26, 27, 28, 29, 30],
+        "n_cycles": [   0.5, 1,  1.5,  2,  2.5,  3,  3.5,  4,  4.5,  5,  
+                        5.5,  6,  6.5,  7,  7.5,  8,  8.5,  9,  9.5, 10,
+                        10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15],
+        "time_bandwidth": 2,
+        "tfr_decim": 1,
+        "include_bands":{
+                        "alpha":[8,13],
+                        "beta" :[13,30]
+                        }
+                    },
+      "fast_30_100": {
+        "freqs":    [   30,  32,  34,  36,  38,  40,  42,  44,  46,  48,  50,  52,  
+                        54,  56,  58,  60,  62,  64,  66,  68,  70,  72,  74,  76,  
+                        78,  80,  82,  84,  86,  88,  90,  92,  94,  96,  98, 100],
+        "n_cycles": [   7.5,  8,  8.5,  9,  9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13,
+                        13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18,18.5, 19,
+                        19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5,24, 24.5, 25
+                        ],
+        "time_bandwidth": 4,
+        "tfr_decim": 1,
+        "include_bands":{
+                        "gamma":[60,90]
+                        }
+                    },
+      "2_100": {
+        "freqs": [  
+            2,   3,   4,   5,   6,   7,   8,   9,  10,  
+            11,  12,  13,  14, 15,  16,  17,  18,  19,  20,  
+            21,  22,  23,  24,  25,  26,  27, 28,  29,  
+            30,  32,  34,  36,  38,  40,  42,  44,  46,  48,  
+            50,  52,  54,  56,  58,  60,  62,  64,  66,  68,   
+            70,  72,  74,  76,  78,  80,  82,  84,  86,  88,  
+            90,  92,  94,  96,  98, 100],
+        "n_cycles": [ 
+            4,  4,  4,  4,  4,  4,  4,  4,  4, 
+            4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  
+            4,  4,  4,  4,  4,  4,  4,  4,  4,
+            7.5,  8 ,  8.5,  9 ,  9.5, 10 , 10.5, 11 , 11.5, 12 , 
+            12.5, 13 , 13.5, 14 , 14.5, 15 , 15.5, 16 , 16.5, 17 , 
+            17.5, 18 , 18.5, 19 , 19.5, 20 , 20.5, 21 , 21.5, 22 ,  
+            22.5, 23 , 23.5, 24 , 24.5, 25],
+        "time_bandwidth": 2,
+        "output":     "complex"
+                }},
+                
+    "cwt_morlet":{
+      "slow_1_30": {
+            "freqs":    [    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 
+                            16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+            "n_cycles": 4,
+            "tfr_decim": 1,
+            "include_bands":{
+                            "alpha":[8,13],
+                            "beta" :[13,30]
+                            }
+                    },
+      "fast_30_100": {
+            "freqs":    [   30,  32,  34,  36,  38,  40,  42,  44,  46,  48,  50,  52,  
+                            54,  56,  58,  60,  62,  64,  66,  68,  70,  72,  74,  76,  
+                            78,  80,  82,  84,  86,  88,  90,  92,  94,  96,  98, 100],
+            "n_cycles": [   7.5,  8,  8.5,  9,  9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13,
+                            13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18,18.5, 19,
+                            19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5,24, 24.5, 25
+                            ],
+            "tfr_decim": 1,
+            "include_bands":{
+                            "gamma":[60,90]
+                            }
+                                        },
+        "2_100": {
+            "freqs": [  
+                2,   3,   4,   5,   6,   7,   8,   9,  10,  
+                11,  12,  13,  14, 15,  16,  17,  18,  19,  20,  
+                21,  22,  23,  24,  25,  26,  27, 28,  29,  
+                30,  32,  34,  36,  38,  40,  42,  44,  46,  48,  
+                50,  52,  54,  56,  58,  60,  62,  64,  66,  68,   
+                70,  72,  74,  76,  78,  80,  82,  84,  86,  88,  
+                90,  92,  94,  96,  98, 100],
+            "n_cycles": [ 
+                4,  4,  4,  4,  4,  4,  4,  4,  4, 
+                4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  
+                4,  4,  4,  4,  4,  4,  4,  4,  4,
+                7.5,  8 ,  8.5,  9 ,  9.5, 10 , 10.5, 11 , 11.5, 12 , 
+                12.5, 13 , 13.5, 14 , 14.5, 15 , 15.5, 16 , 16.5, 17 , 
+                17.5, 18 , 18.5, 19 , 19.5, 20 , 20.5, 21 , 21.5, 22 ,  
+                22.5, 23 , 23.5, 24 , 24.5, 25],
+            "tfr_decim": 1
+                    }}
+            },
+    "cbpt_params_dict": {
+        "cbpt_sensor": {
+            "p_cluster_forming":0.001,
+            "n_conditions": 2,
+            "n_permutations": 5000,
+            "out_type": "indices"},
+        "cbpt_sensor_strict": {
+            "p_cluster_forming":0.0001,
+            "n_conditions": 2,
+            "n_permutations": 5000,
+            "out_type": "indices"},
+        "cbpt_sensor_modest": {
+            "p_cluster_forming":0.0005,
+            "n_conditions": 2,
+            "n_permutations": 5000,
+            "out_type": "indices"},
+        "cbpt_source": {
+            "p_cluster_forming":0.05,
+            "n_conditions": 2,
+            "n_permutations": 5000,
+            "out_type": "indices"}
+        },
+    "Nsample"   : 100,
+    "MI_method_dict":{
+        "gcmi": {
+            "mi_type": "cc", 
+            "copnorm": 1, 
+            "biascorrect": 1,
+            "demeaned": 1  },
+        "mi": {
+            "mi_type": "cc", 
+            "copnorm": 0, 
+            "biascorrect": 1,
+            "demeaned": 0
+    }}
+}

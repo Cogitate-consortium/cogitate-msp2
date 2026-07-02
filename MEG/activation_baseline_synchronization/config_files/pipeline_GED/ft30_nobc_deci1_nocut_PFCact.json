@@ -1,0 +1,14 @@
+{
+    "GED_type": "PFCact",
+    "roi":"PFC",
+    "epoch_data_list": ["dAT_all","replay_all"],
+    "epoch_setting_name":"ft30_nobc_deci1_nocut",
+    "GEDpref_stim": "stimpresent",
+    "cond_GEDpref_select_columns": ["Stimuli_type"],
+    "cond_GEDpref_content_list":[["Face","Object"]],
+    "cond_GEDpref_tw"  :[0,0.5],
+    "cond_noGEDpref_tw":[-0.5,-0.3],
+    "GEDirre_stim": "None",
+    "cond_GEDirre_select_columns": "None",
+    "cond_GEDirre_content_list": "None"
+}

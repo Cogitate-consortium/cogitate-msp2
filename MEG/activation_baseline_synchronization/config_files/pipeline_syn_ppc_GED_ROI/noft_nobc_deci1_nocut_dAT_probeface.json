@@ -1,0 +1,25 @@
+{
+    "corresponding_sub_check_list"   :[ "ACTIVATION_min_sf_uf"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_fs", "vg_fu"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_sf_uf-vg_fs-vg_fu" ,
+    "epoch_data_name":"dAT_probeface",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "trl_types"  : ["Seentrl",
+                    "Unseentrl"],
+    "trl_select_columns":   [
+                             ["Response"],
+                             ["Response"]],
+    "trl_select_conditions":[[["Seen"]],
+                            [["Unseen"]]
+                           ],
+    "ROIpairs_dict":{
+        "FFface_PFCact":{
+            "signal1":"FFface",
+            "signal2":"PFCact"
+        }
+    },
+    "tfr_method":"cwt_morlet",
+    "freq_range_name":"2_100"
+}

@@ -1,0 +1,12 @@
+{
+    "corresponding_sub_check_list"   :[ "ACTIVATION_min_sf_uf"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_fs", "vg_fu"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "corresponding_sub_check_vertROI_list"   :[ "vertFFface","vertV1V2actVbas"],
+    "corresponding_sub_check_vertROI_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_sf_uf-vg_fs-vg_fu-vertFFface-vertV1V2actVbas" ,
+    "epoch_data_name":"dAT_probeface",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "VertROIs":[ "FF_face_select_vertices","V1V2_responsive_activewin_vs_baseline_vertices"]
+}

@@ -1,0 +1,11 @@
+{
+    "corresponding_sub_check_list"   :[  "BASELINE_min_seen_unseen"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_rs", "vg_ls", "vg_ru", "vg_lu"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"BASELINE_min_seen_unseen-vg_rs-vg_ls-vg_ru-vg_lu" ,
+    "band_name":"alpha",
+    "epoch_data_name":"dAT_probestim",
+    "epoch_setting_name":"noft_nobc_deci5_nocut",
+    "roi":"POS"
+}

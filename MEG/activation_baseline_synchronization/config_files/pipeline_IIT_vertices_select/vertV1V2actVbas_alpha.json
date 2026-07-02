@@ -1,0 +1,18 @@
+{
+    "corresponding_sub_check_list"   :[ "SYNCHRONY_min_seen"],
+    "corresponding_sub_check_list_logic" : "or",
+    "tail":-1,
+    "band_name": "alpha",
+    "epoch_data_name": "dAT_all",
+    "saved_roi_list_name": "V1V2_responsive_activewin_vs_baseline_vertices_loweralpha",
+    "compare_trltypes": "SeenStimact_SeenStimbase",
+    "compare_trltypes_select_columns": ["Response","Stimuli_type"],
+    "cond1_name": "dATseenStimacti",
+    "cond2_name": "dATseenStimbase",
+    "cond1_content": [["Seen"],["Face","Object"]],
+    "cond2_content": [["Seen"],["Face","Object"]],
+    "cond1_tw": [0,0.5],
+    "cond2_tw": [-0.5,-0.3],
+    "roi": "V1V2",
+    "cbpt_params_name": "cbpt_source"
+}

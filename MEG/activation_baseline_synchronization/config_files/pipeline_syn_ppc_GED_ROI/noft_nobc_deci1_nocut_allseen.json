@@ -1,0 +1,26 @@
+{
+    "sub_list_name":"All" ,
+    "epoch_data_name_list":["AT_nontarget", "AT_target", "dAT_probeseen"],
+    "epoch_data_name_list_name":"allseen",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "trl_types"  : ["facetrl",
+                    "objetrl"],
+    "trl_select_columns":   [
+                             ["Stimuli_type"],
+                             ["Stimuli_type"]],
+    "trl_select_conditions":[[["Face"]],
+                            [["Object"]]
+                           ],
+    "ROIpairs_dict":{
+        "FFface_PFCact":{
+            "signal1":"FFface",
+            "signal2":"PFCact"
+        },
+    "FFobje_PFCact":{
+            "signal1":"FFobje",
+            "signal2":"PFCact"
+        }
+    },
+    "tfr_method":"cwt_morlet",
+    "freq_range_name":"2_100"
+}

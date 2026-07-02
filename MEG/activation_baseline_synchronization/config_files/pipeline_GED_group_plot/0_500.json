@@ -1,0 +1,6 @@
+{       
+    "sub_list_name":"All",
+    "individual_configfile_contain_list": ["FF","nobc"],
+    "cond1_timewindow": [0,0.5],
+    "cond2_timewindow": [0,0.5]
+}

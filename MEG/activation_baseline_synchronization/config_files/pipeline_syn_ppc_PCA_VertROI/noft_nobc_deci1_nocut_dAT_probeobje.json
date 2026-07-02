@@ -1,0 +1,27 @@
+{
+    "corresponding_sub_check_list"   :[  "ACTIVATION_min_so_uo"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_os", "vg_ou"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "corresponding_sub_check_vertROI_list"   :[ "vertV1V2actVbas","vertFFobje"],
+    "corresponding_sub_check_vertROI_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_so_uo-vg_os-vg_ou-vertV1V2actVbas-vertFFobje" ,
+    "epoch_data_name":"dAT_probeobje",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "trl_types"  : ["Seentrl",
+                    "Unseentrl"],
+    "trl_select_columns":   [
+                             ["Response"],
+                             ["Response"]],
+    "trl_select_conditions":[[["Seen"]],
+                            [["Unseen"]]
+                           ],
+    "ROIpairs_dict":{
+        "vertFFobje_vertV1V2actVbas":{
+            "signal1":"vertFFobje",
+            "signal2":"vertV1V2actVbas"
+        }
+    },
+    "tfr_method":"cwt_morlet",
+    "freq_range_name":"2_100"
+}

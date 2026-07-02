@@ -1,0 +1,8 @@
+{
+    "sub_list_name":"All" ,
+    "epoch_data_name_list":["AT_nontarget", "AT_target", "dAT_probeseen"],
+    "epoch_data_name_list_name":"allseen",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "GED_types":["PFCact","FFface","FFobje"],
+    "GED_metadata_epochtype":"default_noft_nobc"
+}
