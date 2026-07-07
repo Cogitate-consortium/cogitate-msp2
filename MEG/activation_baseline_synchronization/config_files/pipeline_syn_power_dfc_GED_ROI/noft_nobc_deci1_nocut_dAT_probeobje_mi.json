@@ -1,0 +1,29 @@
+{
+    "corresponding_sub_check_list"   :[  "ACTIVATION_min_so_uo"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_os", "vg_ou"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_so_uo-vg_os-vg_ou" ,
+    "epoch_data_name":"dAT_probeobje",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "trl_types"  : ["Seentrl",
+                    "Unseentrl"],
+    "trl_select_columns":   [
+                             ["Response"],
+                             ["Response"]],
+    "trl_select_conditions":[[["Seen"]],
+                            [["Unseen"]]
+                           ],
+    "ROIpairs_dict":{
+        "FFobje_PFCact":{
+            "signal1":"FFobje",
+            "signal2":"PFCact"
+        }
+    },
+    "tfr_method":"multitaper",
+    "freq_range_name":"2_100",
+    "dfc_setting":{
+        "window_len": 0.1,
+        "step":      0.02},
+    "MI_method_name":"mi"
+}

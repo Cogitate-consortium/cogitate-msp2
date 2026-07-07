@@ -1,0 +1,18 @@
+{
+    "tail":1,
+    "corresponding_sub_check_list"   : ["BASELINE_min_seen_unseen"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_lists"   :[[ "vg_fs", "vg_os"],[ "vg_fu", "vg_ou"]],
+    "corresponding_sub_check_meg_list_logics" : ["or","or"],
+    "corresponding_sub_check_vertROI_list"   :[ "vertFFstiVbla"],
+    "corresponding_sub_check_vertROI_list_logic" : "and",
+    "sub_list_name":"BASELINE_min_seen_unseen-vg_ss-vg_su-vertFFstiVbla",
+    "compare_trltypes": "Seen_Unseen",
+    "compare_trltypes_select_column": "Response",
+    "cond1_content_name": "StimSeen",
+    "cond2_content_name": "StimUnseen",
+    "cond1_content_list": ["Seen"],
+    "cond2_content_list": ["Unseen"],
+    "epoch_data_name":"dAT_probestim",
+    "epoch_setting_name":"ft_nobc_deci1_nocut"
+}

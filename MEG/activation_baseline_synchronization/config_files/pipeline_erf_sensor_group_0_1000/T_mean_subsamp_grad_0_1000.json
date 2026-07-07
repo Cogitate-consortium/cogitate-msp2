@@ -1,0 +1,10 @@
+{
+    "epoch_avg_type":"T_mean",
+    "epoch_subsampling_type":"balanced",
+    "chan_type" :"grad",
+    "reduce_type":["rms","mean"],
+    "cond1_timewindow": [0,1],
+    "cond2_timewindow": [0,1],
+    "tail":1,
+    "cbpt_params_name": "cbpt_sensor"
+}

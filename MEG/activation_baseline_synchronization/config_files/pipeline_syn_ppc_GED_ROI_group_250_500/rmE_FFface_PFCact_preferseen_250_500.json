@@ -1,0 +1,11 @@
+{       
+    "tail":1,
+    "cond1_timewindow": [0.25,0.5],
+    "cond2_timewindow": [0.25,0.5],
+    "cbpt_params_name": "cbpt_source",
+    "input_type":"rmE",
+    "ROIpairs_name":"FFface_PFCact",
+    "cond1": "Seentrl",
+    "cond2": "Unseentrl", 
+    "individual_configfile_contain_either_list": ["dAT_probeface"]
+}

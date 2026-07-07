@@ -1,0 +1,11 @@
+{
+    "corresponding_sub_check_list"   :[ "SYNCHRONY_min_seen"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_fs", "vg_os"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"SYNCHRONY_min_seen-vg_fs-vg_os" ,
+    "epoch_data_name":"dAT_probeseen",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "GED_types":["PFCact","FFface","FFobje"],
+    "GED_metadata_epochtype":"default_noft_nobc"
+}

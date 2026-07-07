@@ -1,0 +1,9 @@
+{
+    "roi":"POS",
+    "epoch_avg_type":"T_mean_V_rms",
+    "epoch_subsampling_type":"balanced",
+    "cond1_timewindow": [0,1.5],
+    "cond2_timewindow": [0,1.5],
+    "cond3_timewindow": [0,1.5],
+    "cbpt_params_name": "cbpt_source"
+}

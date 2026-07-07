@@ -1,0 +1,13 @@
+{       
+    "tail":-1,
+    "individual_configfile_contain_list": ["PFC","1_30"],
+    "corresponding_sub_check_list"   :[  "SYNCHRONY_min_seen"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_lists"   :[[ "vg_fs", "vg_os"],[ "vg_fu", "vg_ou"]],
+    "corresponding_sub_check_meg_list_logics" : ["or","or"],
+    "sub_list_name":"SYNCHRONY_min_seen-vg_ss-vg_su",
+    "cond1_timewindow": [0.25,0.5],
+    "cond2_timewindow": [0.25,0.5],
+    "cbpt_params_name": "cbpt_source"
+
+}

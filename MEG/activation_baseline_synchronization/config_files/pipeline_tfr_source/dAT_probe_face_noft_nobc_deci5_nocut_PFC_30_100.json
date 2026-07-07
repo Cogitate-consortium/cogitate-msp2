@@ -1,0 +1,13 @@
+{
+    "roi":"PFC",
+    "compare_trltypes": "Seen_Unseen",
+    "compare_trltypes_select_column": "Response",
+    "cond1_content_name": "FaceSeen",
+    "cond2_content_name": "FaceUnseen",
+    "cond1_content_list": ["Seen"],
+    "cond2_content_list": ["Unseen"],
+    "epoch_data_name":"dAT_probeface",
+    "epoch_setting_name":"noft_nobc_deci5_nocut",
+    "tfr_method":"multitaper",
+    "freq_range_name":"fast_30_100"
+}

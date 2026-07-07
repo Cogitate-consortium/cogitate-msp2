@@ -1,0 +1,11 @@
+{       
+    "tail":1,
+    "cond1_timewindow": [0.1,0.6],
+    "cond2_timewindow": [0.1,0.6],
+    "cbpt_params_name": "cbpt_source",
+    "input_type":"rmE",
+    "ROIpairs_name":"vertFFobje_vertV1V2actVbas",
+    "cond1": "Seentrl",
+    "cond2": "Unseentrl", 
+    "individual_configfile_contain_either_list": ["dAT_probeobje"]
+}

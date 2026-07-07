@@ -1,0 +1,17 @@
+{
+    "corresponding_sub_check_list"   :[ "ACTIVATION_min_sf_uf"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_fs", "vg_fu","vg_blank"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_sf_uf-vg_fs-vg_fu-vg_blank",
+    "compare_trltypes": "FaceSeen_FaceUnseen_BlankUnseen",
+    "compare_trltypes_select_column": ["Stimuli_type","Response"],
+    "cond1_content_name": "FaceSeen",
+    "cond2_content_name": "FaceUnseen",
+    "cond3_content_name": "BlankUnseen",
+    "cond1_content_list": [["Face"],["Seen"]],
+    "cond2_content_list": [["Face"],["Unseen"]],
+    "cond3_content_list": [["Blank"],["Unseen"]],
+    "epoch_data_name":"dAT_probe",
+    "epoch_setting_name":"ft_bc_deci1_nocut"
+}

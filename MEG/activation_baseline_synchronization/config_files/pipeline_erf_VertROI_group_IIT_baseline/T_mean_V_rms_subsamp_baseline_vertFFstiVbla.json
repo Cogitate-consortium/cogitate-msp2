@@ -1,0 +1,10 @@
+{
+    "roi":"FF_responsive_stim_vs_blank_vertices",
+    "epoch_avg_type":"T_mean_V_rms",
+    "epoch_subsampling_type":"balanced",
+    "cond1_timewindow": [-0.5,0],
+    "cond2_timewindow": [-0.5,0],
+    "tail":1,
+    "cbpt_params_name": "cbpt_source",
+    "individual_configfile_contain_list": ["probe_stim"]
+}

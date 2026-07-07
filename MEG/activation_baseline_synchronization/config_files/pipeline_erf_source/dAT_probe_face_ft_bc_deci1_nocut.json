@@ -1,0 +1,15 @@
+{
+    "corresponding_sub_check_list"   :[ "ACTIVATION_min_sf_uf"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_fs", "vg_fu"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_sf_uf-vg_fs-vg_fu",
+    "compare_trltypes": "Seen_Unseen",
+    "compare_trltypes_select_column": "Response",
+    "cond1_content_name": "FaceSeen",
+    "cond2_content_name": "FaceUnseen",
+    "cond1_content_list": ["Seen"],
+    "cond2_content_list": ["Unseen"],
+    "epoch_data_name":"dAT_probeface",
+    "epoch_setting_name":"ft_bc_deci1_nocut"
+}

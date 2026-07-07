@@ -1,0 +1,15 @@
+{
+    "corresponding_sub_check_list"   : ["BASELINE_min_seen_unseen"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_lists"   :[[ "vg_fs", "vg_os"],[ "vg_fu", "vg_ou"]],
+    "corresponding_sub_check_meg_list_logics" : ["or","or"],
+    "sub_list_name":"BASELINE_min_seen_unseen-vg_ss-vg_su",
+    "roi":"PFC",
+    "epoch_avg_type":"T_mean_V_rms",
+    "epoch_subsampling_type":"balanced",
+    "cond1_timewindow": [-0.5,0],
+    "cond2_timewindow": [-0.5,0],
+    "tail":-1,
+    "cbpt_params_name": "cbpt_source",
+    "individual_configfile_contain_list": ["probe_stim"]
+}

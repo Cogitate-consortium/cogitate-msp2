@@ -1,0 +1,13 @@
+{
+    "sub_list_name":"All" ,
+    "epoch_data_name_list":["AT_nontarget", "AT_target", "dAT_probeseen"],
+    "epoch_data_name_list_name":"allseen",
+    "epoch_setting_name":"noft_bc_deci1_nocut",
+    "compare_trltypes": "Face_Obje",
+    "compare_trltypes_select_column": "Stimuli_type",
+    "cond1_content_name": "facetrl",
+    "cond2_content_name": "objetrl",
+    "cond1_content_list": ["Face"],
+    "cond2_content_list": ["Object"],
+    "ROI":"FF"
+}

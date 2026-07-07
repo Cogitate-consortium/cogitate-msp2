@@ -1,0 +1,15 @@
+{
+    "corresponding_sub_check_list"   :[  "ACTIVATION_min_so_uo"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_os", "vg_ou"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_so_uo-vg_os-vg_ou" ,
+    "compare_trltypes": "Seen_Unseen",
+    "compare_trltypes_select_column": "Response",
+    "cond1_content_name": "objeSeen",
+    "cond2_content_name": "objeUnseen",
+    "cond1_content_list": ["Seen"],
+    "cond2_content_list": ["Unseen"],
+    "epoch_data_name":"dAT_probeobje",
+    "epoch_setting_name":"ft_bc_deci1_nocut"
+}

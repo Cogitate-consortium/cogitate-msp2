@@ -1,0 +1,6 @@
+{
+    "band_name":"gamma",
+    "epoch_setting_name":"noft_nobc_deci5_cutpre1000_1000",
+    "epoch_data_name": "replay_all",
+    "sub_list_name":"all"
+    }

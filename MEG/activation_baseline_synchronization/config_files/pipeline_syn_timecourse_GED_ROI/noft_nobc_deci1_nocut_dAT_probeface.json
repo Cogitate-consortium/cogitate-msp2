@@ -1,0 +1,11 @@
+{
+    "corresponding_sub_check_list"   :[ "ACTIVATION_min_sf_uf"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_fs", "vg_fu"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"ACTIVATION_min_sf_uf-vg_fs-vg_fu" ,
+    "epoch_data_name":"dAT_probeface",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "GED_types":["PFCact","FFface","FFobje"],
+    "GED_metadata_epochtype":"default_noft_nobc"
+}

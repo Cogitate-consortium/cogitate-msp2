@@ -1,0 +1,33 @@
+{
+    "corresponding_sub_check_list"   :[ "SYNCHRONY_min_seen"],
+    "corresponding_sub_check_list_logic" : "and",
+    "corresponding_sub_check_meg_list"   :[ "vg_fs", "vg_os"],
+    "corresponding_sub_check_meg_list_logic" : "and",
+    "sub_list_name":"SYNCHRONY_min_seen-vg_fs-vg_os" ,
+    "epoch_data_name":"dAT_probeseen",
+    "epoch_setting_name":"noft_nobc_deci1_nocut",
+    "trl_types"  : ["facetrl",
+                    "objetrl"],
+    "trl_select_columns":   [
+                             ["Stimuli_type"],
+                             ["Stimuli_type"]],
+    "trl_select_conditions":[[["Face"]],
+                            [["Object"]]
+                           ],
+    "ROIpairs_dict":{
+        "FFface_PFCact":{
+            "signal1":"FFface",
+            "signal2":"PFCact"
+        },
+        "FFobje_PFCact":{
+            "signal1":"FFobje",
+            "signal2":"PFCact"
+        }
+    },
+    "tfr_method":"multitaper",
+    "freq_range_name":"2_100",
+    "dfc_setting":{
+        "window_len": 0.1,
+        "step":      0.02},
+    "MI_method_name":"mi"
+}
