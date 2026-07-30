@@ -12,7 +12,7 @@ Run pipelines **in the order below**. Later steps depend on outputs from earlier
 
 - **Linux cluster** with **SLURM** (`sbatch`, job arrays)
 - **FSL 6.x** (`feat`, `fslmeants`, `fslstats`, `fslmaths`, …) — load before running FEAT steps, e.g. `module load FSL`
-- **Python 3.7+** with `pandas`, `numpy` (most scripts); decoding additionally needs scikit-learn, nilearn, MNE, etc. (see [decoding/readme.md](decoding/readme.md))
+- **Python 3.7+** with `pandas`, `numpy` (most scripts); gPPI Bayes Factor steps also need `nibabel`, `pingouin`; decoding additionally needs scikit-learn, nilearn, MNE, etc. (see [decoding/readme.md](decoding/readme.md))
 
 
 
@@ -27,6 +27,7 @@ Run pipelines **in the order below**. Later steps depend on outputs from earlier
 | Raw behavioural log files  | `{RAW_DIR}` (see logfiles script)                       |
 | Subject inclusion CSV      | `{CODE_PATH}/ses-v2-analysis-subs-fmri.csv`             |
 | FFA/LOC seed masks (Exp 1) | `{BIDS_ROOT}/derivatives/gppi_seeds/sub-{code}/`        |
+| Theory ROI masks (gPPI BF) | `{BIDS_ROOT}/derivatives/masks/ICBM2009c_asym_nlin` (override with `$MASKS_PATH`) |
 
 
 
@@ -49,6 +50,7 @@ Clone or sync this repository to `{CODE_PATH}` on your cluster.
 | ---------------------------------------------- | ----------------------------------------------------- |
 | `{BIDS_ROOT}/derivatives/regressoreventfiles/` | FSL 3-column event files and confounds                |
 | `{BIDS_ROOT}/derivatives/fslFeat/`             | FEAT outputs (`activation/`, `gPPI/`, `FIR/`, `EVC/`) |
+| `{BIDS_ROOT}/derivatives/bf/`                  | gPPI group Bayes Factor maps and ROI summary CSVs     |
 | `{CODE_PATH}/<pipeline>/fsf_files/`            | Generated FSF design files                            |
 | `{CODE_PATH}/<pipeline>/job_files/`            | SLURM submission markers and logs                     |
 
@@ -246,9 +248,23 @@ bash 10_run_PPI_3rd_level.sh
 # 11. ROI means in V1/V2 → derivatives/gppi/gppi_evc_roi_means_*.csv
 bash run_average_gppi_in_evc.sh
 
+# 12. Voxel-wise Bayes Factor maps from 3rd-level gPPI t-stats
+#     Input: fslFeat/gPPI/group/N*_..._PPI_{FFA,LOC}_..._desc-cope{3,4}.gfeat
+#            (tstat1, dof, mask under cope1.feat/)
+#     Output: derivatives/bf/{FFA,LOC}/{bf10,log10_bf10,bf01,log10_bf01}.nii.gz
+python3 12_gppi_group_analysis_BF.py
+
+# 13. ROI summary tables from BF maps (needs roi_definitions.py + theory masks)
+#     Input: derivatives/bf/{FFA,LOC}/*.nii.gz
+#            derivatives/masks/ICBM2009c_asym_nlin/*bh_{roi}_space-*.nii.gz
+#     Output: derivatives/bf/{FFA,LOC}_{bf10,bf01}_*_roi_summary.csv
+python3 13_gppi_group_level_tables_BF.py
+
 # Optional: 3rd-level inclusion report → gPPI_code/3rd level report/
 bash make_3rd_level_inclusion_report.sh
 ```
+
+Steps **12–13** convert group FEAT one-sample t-maps to JZS Bayes Factors (Pingouin) and summarize `% voxels with BF > 3` per theory ROI (GNW / IIT). Override paths with `$BIDS_ROOT` / `$MASKS_PATH` if needed.
 
 **Optional EVC follow-up:**
 
