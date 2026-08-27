@@ -1,25 +1,33 @@
-# cogitate-msp2
-Cogitate Main Scientific Publication Experiment 2
-This repository contains all of the code related to the Cogitate Main Scientific Paper 2 (MSP2). You can find more information below.
+# cogitate-msp1
 
-Paper Title: "An adversarial collaboration to critically evaluate theories of consciousness"
+This repository contains all of the code related to the Cogitate Main Scientific Paper 1 (MSP1). You can find more information below.
 
-Information	Links
-Website	Cogitate
-Twitter	Twitter Follow
-Preregistration	Link to preregistration documents
-Publication DOI	Link to bioRxiv
-Dataset	Will be made available in the future.
-Structure
+Paper Title: "Testing predictions of the Global Neuronal Workspace and Integrated Information Theories with a Novel Attention Paradigm"  
+
+| Information | Links |
+| --- | --- |
+| Website | ![Cogitate](https://img.shields.io/badge/cogitate-website-cornflowerblue) |
+| Twitter | [![Twitter Follow](https://img.shields.io/twitter/follow/arccogitate?style=social)](https://twitter.com/arccogitate) |
+| Preregistration | ![Link to preregistration documents](https://osf.io/mbcfy) |
+| Publication DOI | not yet available - please check back |
+| Dataset | Will be made available in the future. |
+
+## Structure
+
 The analysis code has been split based on the measurement modality as below:
 
-behavioural and eye tracking (beh_et)
-Magnetoencephalography (meeg)
-Functional Magnetic Resonance Imaging (fmri)
+- behavioural and eye tracking (beh_et)
+- Magnetoencephalography (meeg)
+- Functional Magnetic Resonance Imaging (fmri)
+
 The analyses for each modality have been carried out independently. Please read the about.md file carefully before using the code.
 
-Usage
-Clone this repository using git clone https://github.com/Cogitate-consortium/cogitate-msp2
-For each analysis, read the about.md and readme.md files carefully. This will describe how to build the environment and run the code.
-Contact
-For any questions please feel free to raise an issue or contact Tanya Brown.
+## Usage
+
+1. Clone this repository using `git clone https://github.com/Cogitate-consortium/cogitate-msp2`
+2. For each analysis, read the about.md and readme.md files carefully. This will describe how to build the environment and run the code.
+
+## Contact
+
+For any questions please feel free to raise an issue or contact [Tanya Brown](mailto:tanya.brown@ae.mpg.de).
+eel free to raise an issue or contact Tanya Brown.
