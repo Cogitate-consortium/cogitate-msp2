@@ -1,4 +1,4 @@
-# cogitate-msp1
+# cogitate-msp2
 
 This repository contains all of the code related to the Cogitate Main Scientific Paper 1 (MSP1). You can find more information below.
 
