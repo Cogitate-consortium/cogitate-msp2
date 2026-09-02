@@ -187,7 +187,7 @@ def rsa_main():
                                     'rois': rois_list[roi]
                                 }
 
-    out_file = cfg.similarity_file_source_subroi[:-4] + '_core_v10.pkl'
+    out_file = cfg.similarity_file[:-4] + '_core.pkl'
     dump_data(results, out_file)
 
 
@@ -312,7 +312,7 @@ def rsa_temporal_splits():
                                     'rois': rois_list[roi]
                                 }
 
-    out_file = cfg.similarity_file_source_subroi[:-4] + f'_temporal_splits_v10.pkl'
+    out_file = cfg.similarity_file[:-4] + f'_temporal_splits.pkl'
     dump_data(results, out_file)
 
 

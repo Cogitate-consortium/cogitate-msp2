@@ -3,18 +3,6 @@ import os
 
 import numpy as np
 
-# Select local or HPC paths from the operating system.
-if sys.platform == 'darwin':
-    hpc = False
-    dummy = True
-elif sys.platform == 'win32':
-    hpc = False
-    dummy = True
-else:
-    hpc = True
-    dummy = False
-
-
 # Subjects and experimental conditions.
 subjects = ['SA101','SA104','SA108','SA111','SA112','SA114','SA116','SA118','SA121','SA123','SA124',
             'SA126','SA127','SA131','SA132','SA136','SA138','SA139','SA140','SA144','SA145',
@@ -32,50 +20,28 @@ task_partitions = {'vg': ['seen'],
 content_targets = ['category', 'location']
 
 # Subject-specific paths and runtime settings.
-if hpc:
-    subject = subjects[int(sys.argv[1])]
-    sampling_rate = 100
-    data_dir = '/mnt/beegfs/XNAT/COGITATE/MEG/phase_2/processed/bids/derivatives/preprocessing/sub-{}/ses-V2/meg'.format(subject)
-    fwd_dir = '/mnt/beegfs/XNAT/COGITATE/MEG/phase_2/processed/bids/derivatives/forward/sub-{}/ses-V2/meg'.format(subject)
-    fs_dir = '/mnt/beegfs/XNAT/COGITATE/MEG/phase_2/processed/bids/derivatives/fs'
-    power_dir = '/mnt/beegfs/XNAT/COGITATE/MEG/phase_2/processed/bids/derivatives/ana1_save_power'
-    out_dir = '/mnt/beegfs/XNAT/COGITATE/MEG/phase_2/processed/bids/derivatives/rsa_test1/results'
+subject = subjects[int(sys.argv[1])]
+sampling_rate = 100
 
-else:
-    subject = 'SA148'
-    sampling_rate = 100
-    data_dir = '/Users/pablo/Documents/phd/cogitate/meg/data'
-    fwd_dir = os.path.join(data_dir, 'forward')
-    fs_dir = os.path.join(data_dir, 'fs')
-    power_dir = '/Users/pablo/Documents/phd/cogitate/meg/data/ana1_save_power'
-    out_dir = '/Users/pablo/Documents/phd/cogitate/meg/results'
+project_dir = '/path/to/derivatives/'
+data_dir = os.path.join(project_dir, 'preprocessing/sub-{}/ses-V2/meg'.format(subject))
+fwd_dir = os.path.join(project_dir, 'forward/sub-{}/ses-V2/meg'.format(subject))
+fs_dir = os.path.join(project_dir, 'fs')
+power_dir = os.path.join(project_dir, 'ana1_save_power')
+out_dir = os.path.join(project_dir, 'results')
 
-
-# Lightweight local settings versus full cluster settings.
-if dummy:
-    n_perms = 1
-else:
-    n_perms = 10
-
+n_perms = 10
 n_pstrials = 3
 test_ratio = .33
 
 whitening = True
 
-dec_label = 'decoding'
 rdm_label = 'rdms'
 sim_label = 'similarity'
 
-# Output names encode whether whitening was applied.
+# Output name encode whether whitening was applied.
 if whitening:
-    dec_label = dec_label + '_mnn'
-    rdm_label = rdm_label + '_mnn'
     sim_label = sim_label + '_mnn'
 
-decoding_file = os.path.join(out_dir, '{}_{}.pkl'.format(dec_label,subject))
+similarity_file = os.path.join(out_dir, '{}_{}.pkl'.format(sim_label,subject))
 
-similarity_file_source = os.path.join(out_dir, '{}_rois_{}.pkl'.format(sim_label,subject))
-similarity_file_source_subroi = os.path.join(out_dir, '{}_rois_subset_{}.pkl'.format(sim_label,subject))
-similarity_file_source_single = os.path.join(out_dir, '{}_rois_single_{}.pkl'.format(sim_label,subject))
-
-rdm_file = os.path.join(out_dir, '{}_{}.pkl'.format(rdm_label,subject))
