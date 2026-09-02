@@ -130,7 +130,7 @@ def get_contrast_main(contrast, freq='combined_6'):
     # Load the nested subject-level similarity trees.
     results = {}
     for sub in cfg.subjects:
-        file = os.path.join(cfg.out_dir, f'controls/similarity_rois_subset_{sub}_core_v10.pkl')
+        file = os.path.join(cfg.out_dir, f'controls/similarity_{sub}_core.pkl')
         if os.path.isfile(file):
             results[sub] = load_data(file)[freq]
         else:
@@ -182,7 +182,7 @@ def get_contrast_timesplit(freq='combined_6', temporal_splits=True, p_crit=.06):
     # Load temporal-split results for all available subjects.
     results = {}
     for sub in cfg.subjects:
-        file = os.path.join(cfg.out_dir, f'controls/similarity_rois_subset_{sub}_temporal_splits_v10.pkl' if temporal_splits else f'similarity_mnn_rois_subset_{sub}_p1.pkl')
+        file = os.path.join(cfg.out_dir, f'controls/similarity_{sub}_temporal_splits.pkl' if temporal_splits else f'similarity_mnn_rois_subset_{sub}_p1.pkl')
         if os.path.isfile(file):
             results[sub] = load_data(file)[freq]
         else:
