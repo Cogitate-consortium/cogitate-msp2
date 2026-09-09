@@ -50,7 +50,7 @@ Cluster modules used in the SLURM templates / job scripts:
 
 ## Installation guide
 
-This repository is analysis code only (no compiled package). Install the external tools below, then clone the repo onto your cluster.
+This repository is analysis code only (no compiled package). Install the external tools below, and clone the repo onto your cluster.
 
 1. **Clone the repository** (a few minutes):
    ```bash
@@ -68,7 +68,7 @@ This repository is analysis code only (no compiled package). Install the externa
    ```
 6. **Decoding / nibetaseries** — [nibetaseries docs](https://nibetaseries.readthedocs.io/en/stable/) and [Singularity](https://docs.sylabs.io/guides/latest/user-guide/); on HPC often `module load nibetaseries/0.6.0`.
 
-**Typical install time on a normal desktop:** cloning the repo and installing the Python packages above usually takes **about 5–15 minutes**. Installing FSL, FreeSurfer, and/or ANTs from scratch is longer (often **30 minutes to a few hours**, depending on download speed); follow the linked vendor guides.
+**Typical install time on a normal desktop:** cloning the repo and installing the Python packages above usually takes **about 5–15 minutes**. Installing FSL, FreeSurfer, and/or ANTs from scratch is longer (often **30 minutes to a few hours**, depending on download speed); follow the linked guides.
 
 ---
 
