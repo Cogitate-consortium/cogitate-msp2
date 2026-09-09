@@ -6,17 +6,73 @@ Run pipelines **in the order below**. Later steps depend on outputs from earlier
 
 ---
 
-## General requirements
+## System requirements
 
-### Compute environment
+### Operating system
 
-- **Linux cluster** with **SLURM** (`sbatch`, job arrays)
-- **FSL 6.x** (`feat`, `fslmeants`, `fslstats`, `fslmaths`, …) — load before running FEAT steps, e.g. `module load FSL`
-- **Python 3.7+** with `pandas`, `numpy` (most scripts); gPPI Bayes Factor steps also need `nibabel`, `pingouin`; decoding additionally needs scikit-learn, nilearn, MNE, etc. (see [decoding/readme.md](decoding/readme.md))
+- **Linux** (bash + SLURM job scripts). Analyses were developed and run on an HPC Linux cluster (CentOS-compatible module environment). macOS/Windows are not supported for the FEAT / SLURM pipelines.
 
+### Software dependencies
 
+| Component | Role | Version / notes |
+| --------- | ---- | --------------- |
+| **SLURM** | Job submission (`sbatch`, job arrays) | Cluster workload manager |
+| **Bash** | Pipeline wrapper scripts | Standard Linux bash |
+| **Python** | Most analysis scripts | **≥ 3.7** |
+| **FSL** | FEAT / `fslmeants` / `fslstats` / `fslmaths` | **6.x** (see tested versions) |
+| **FreeSurfer** | EVC anatomical V1/V2 labels (§2) | **6.x** |
+| **ANTs** | EVC ROI construction (§2) | **2.3.x** |
+| **Singularity** | Decoding beta-series container runtime (§7) | Required for nibetaseries jobs |
+| **nibetaseries** | Trial-level beta-series (§7) | **≥ 0.6.0** |
 
-### Upstream data (not produced by this repo)
+**Python packages (core pipelines):** `numpy`, `pandas`
+
+**Python packages (gPPI Bayes Factor, §5 steps 12–13):** `nibabel`, `pingouin`
+
+**Python packages (decoding, §7):** `scikit-learn`, `scipy`, `nilearn`, `mne`, `matplotlib` — see [decoding/readme.md](decoding/readme.md)
+
+### Versions the software has been tested on
+
+Cluster modules used in the SLURM templates / job scripts:
+
+- **FSL** `6.0.2` (e.g. `FSL/6.0.2-foss-2019a-Python-3.7.2`, or generic `module load FSL`)
+- **FreeSurfer** `6.0.1` (`FreeSurfer/6.0.1-centos6_x86_64`)
+- **ANTs** `2.3.2` (`ANTs/2.3.2-foss-2019a-Python-3.7.2`)
+- **SciPy-bundle** `2024.05-gfbf-2024a` (numpy / scipy / pandas stack for job scripts)
+- **nibetaseries** `0.6.0` (`module load nibetaseries/0.6.0`)
+
+### Hardware
+
+- **No specialized hardware** (e.g. GPU) is required.
+- A **multi-core Linux HPC with SLURM** is the intended environment for cohort-scale FEAT and decoding. Individual steps can run on a standard multi-core Linux workstation, but full-pipeline / multi-subject jobs need cluster CPU and memory (e.g. nibetaseries jobs request many cores and tens of GB RAM).
+
+---
+
+## Installation guide
+
+This repository is analysis code only (no compiled package). Install the external tools below, then clone the repo onto your cluster.
+
+1. **Clone the repository** (a few minutes):
+   ```bash
+   git clone https://github.com/Cogitate-consortium/cogitate-msp2.git
+   # sync or place the fMRI/ tree at ${BIDS_ROOT}/code (or set CODE_PATH)
+   ```
+2. **FSL** — follow [FSL installation](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/install/index); then e.g. `module load FSL` on HPC.
+3. **FreeSurfer** (EVC only) — [Download and install](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall).
+4. **ANTs** (EVC only) — [ANTsX/ANTs](https://github.com/ANTsX/ANTs).
+5. **Python packages** (core + optional BF / decoding):
+   ```bash
+   pip install numpy pandas nibabel pingouin
+   # decoding (see decoding/readme.md for full list):
+   # pip install scikit-learn scipy nilearn mne matplotlib
+   ```
+6. **Decoding / nibetaseries** — [nibetaseries docs](https://nibetaseries.readthedocs.io/en/stable/) and [Singularity](https://docs.sylabs.io/guides/latest/user-guide/); on HPC often `module load nibetaseries/0.6.0`.
+
+**Typical install time on a normal desktop:** cloning the repo and installing the Python packages above usually takes **about 5–15 minutes**. Installing FSL, FreeSurfer, and/or ANTs from scratch is longer (often **30 minutes to a few hours**, depending on download speed); follow the linked vendor guides.
+
+---
+
+## Upstream data (not produced by this repo)
 
 
 | Resource                   | Default path                                            |
@@ -32,7 +88,7 @@ Run pipelines **in the order below**. Later steps depend on outputs from earlier
 
 
 
-### Path variables
+## Path variables
 
 Most scripts accept overrides via environment:
 
@@ -43,7 +99,7 @@ export CODE_PATH="${BIDS_ROOT}/code"
 
 Clone or sync this repository to `{CODE_PATH}` on your cluster.
 
-### Shared outputs
+## Shared outputs
 
 
 | Location                                       | Contents                                              |
@@ -57,7 +113,7 @@ Clone or sync this repository to `{CODE_PATH}` on your cluster.
 
 
 
-### QC utilities (optional, after FEAT)
+## QC utilities (optional, after FEAT)
 
 ```bash
 cd glm
