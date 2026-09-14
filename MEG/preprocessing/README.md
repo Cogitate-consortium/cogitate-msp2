@@ -51,7 +51,7 @@ The example below processes participant `SA124`.
 From the command line, run preprocessing step 1:
 
 ```bash
-python REPO_ROOT/cogitate-msp1/scripts/meeg/preprocessing/99_run_preproc.py \
+python REPO_ROOT/cogitate-msp2/MEG/preprocessing/99_run_preproc.py \
     --sub SA124 \
     --visit V2 \
     --record run \
@@ -61,7 +61,7 @@ python REPO_ROOT/cogitate-msp1/scripts/meeg/preprocessing/99_run_preproc.py \
 After step 1 has completed successfully, run step 2:
 
 ```bash
-python REPO_ROOT/cogitate-msp1/scripts/meeg/preprocessing/P99_run_preproc.py \
+python REPO_ROOT/cogitate-msp2/MEG/preprocessing/P99_run_preproc.py \
     --sub SA124 \
     --visit V2 \
     --record run \
