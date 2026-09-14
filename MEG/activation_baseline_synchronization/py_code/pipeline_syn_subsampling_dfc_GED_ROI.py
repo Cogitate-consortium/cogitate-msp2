@@ -415,7 +415,7 @@ for ROIpairs_name, ROIpairs in param['ROIpairs_dict'].items():
                     # ---------- loop through frequency bands to calculate mi <time course of ROI1; time course of ROI2>
                     fw  = np.zeros( (nf, nw) )
                     for fi, fs in  enumerate(tfr_map[freq_range_name]['freqs']) :
-                        fs
+                       
                         #% complex of each frequency
                         tlvt_cmp     =  tlvft[:,:,fi,:]
                         # we can also not **2 for the same results when copnorm_nd 
@@ -432,13 +432,6 @@ for ROIpairs_name, ROIpairs in param['ROIpairs_dict'].items():
 
                         #% function conn_dfc 
                         # compute pairwise Dynamic Functional Connectivity (DFC)
-                        # Here we input the time course of two ROIs and calculate the DFC between them
-
-                        # MI method is controled by estimator
-                        # Here we use default, it use mi, although the estimater is called Gaussian Copula Mutual Information Estimator
-                        # by default, copnorm=False, i.e. no copnorm + mi_nd_gg
-                        # So the input data do not copnorm but directly calcuate mi_nd_gg (MI for continuous variables)
-                        # default: estimator = GCMIEstimator(mi_type='cc', copnorm=False, biascorrect= false, demeaned=False,verbose=False)
                         dfc_tl_vpair_w = conn_dfc(
                                                         # (n_epochs, n_roi, n_times)
                                                         data = xdata_tlvt,
