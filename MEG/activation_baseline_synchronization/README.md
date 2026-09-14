@@ -1,8 +1,9 @@
 # MEG Source-Level Activation, Baseline & Synchronization
 
-MEG source-level **activation**, **baseline**, and **synchronization** analyses
-(COGITATE Experiment 2). This folder is one part of the larger project and covers
-only these MEG analyses:
+This repository contains the code used for the MEG source-level **activation**,
+**baseline**, and **synchronization** analyses reported in COGITATE Experiment 2
+(ses-V2). This folder is one part of the larger project and covers only these
+MEG analyses:
 
 - **Activation** — source-level evoked (ERF) and oscillatory (TFR) responses;
 - **Baseline** — contralateral-alpha power;
@@ -16,12 +17,42 @@ steps that these analyses build on.
 > r = 0.707; `bayes_factor_fun.bayes_ttest`). 
 ---
 
-## 0. Paths & setup (read this first)
+## General requirements
+
+### Compute environment
+
+* Python (3.12.2)
+* MNE-Python (1.6.0)
+* MNE-BIDS (0.9)
+* MNE-Connectivity (0.7.0)
+* Frites (0.4.4)
+* NumPy (1.26.4)
+* SciPy (1.12.0)
+* pandas (2.2.1)
+* statsmodels (0.14.1)
+* Matplotlib (3.8.3)
+* seaborn (0.13.2)
+* Pingouin (0.5.5)
+* FreeSurfer reconstructions for source-space analyses
+
+### Upstream data
+
+The analyses require outputs from the MEG preprocessing and source-reconstruction pipelines:
+
+| Resource                         | Description                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Preprocessed MEG epochs          | Epochs for the dAT, AT and resting-state recordings                            |
+| Forward solutions                | Participant-specific MEG forward models                                        |
+| FreeSurfer derivatives           | Participant-specific cortical reconstructions                                  |
+
+---
+
+## 0. Paths & setup
 
 Only **one** path must be set by hand — everything else is derived from it or from
 the repository's own location, so the code runs wherever you clone it.
 
-### The one knob you set: `bids_root`
+### `bids_root`
 Edit `py_code/EXP1_config.py` and point `bids_root` at your local copy of the
 COGITATE MEG BIDS dataset (external raw data, **not** shipped with this repo):
 
@@ -165,15 +196,15 @@ head docstring.
 
 ---
 
-## 5. Pipelines by analysis stage
+## 5. Pipelines by analysis step
 
-### Stage 0 — Preparation (per subject)
+### Step 0 — Preparation (per subject)
 | Script | Role |
 |--------|------|
 | `pipeline_presave_sourceinfo.py` | Pre-save forward/inverse solution (inverse operator, covariances/rank, example stc) so downstream source analyses reuse it. Config: `pipeline_presave_sourceinfo/`. |
 | `pipeline_presaved_power.py` | Pre-save source-level band power (Morlet, per band) as `pow_tlvt` (trial × vertex × time) + per-ROI vertex indices. Config: `pipeline_presaved_power/`. |
 
-### Stage 1 — IIT vertex selection (VertROI)
+### Step 1 — IIT vertex selection (VertROI)
 Select the "qualified" vertices per ROI, then bring them to a common brain.
 | Script | Role |
 |--------|------|
@@ -182,13 +213,13 @@ Select the "qualified" vertices per ROI, then bring them to a common brain.
 | `pipeline_IIT_vertices_morph_group.py` | **Group.** Average morphed maps across subjects for common-space display. *Runs directly* (hardcoded config, e.g. `…/pipeline_IIT_vertices_morph/dAT.json`). |
 | `pipeline_IIT_vertices_plot.py` | **Group.** VertROI summary table (which/how many subjects have vertices) + group-mean log-power time course (cond1 vs cond2) over significant vertices. *Iterates over* config folder `pipeline_IIT_vertices_plot/`. |
 
-### Stage 2 — GED spatial filters (GNW nodes)
+### Step 2 — GED spatial filters (GNW nodes)
 | Script | Role |
 |--------|------|
 | `pipeline_GED.py` | **Individual.** Build a GED (Generalized Eigenvalue Decomposition) spatial filter per ROI/GED_type (signal = stim-active vs reference = no-stim), save component time courses. Used later for synchronization (GNW nodes FF, PFC). Config: `pipeline_GED/`. |
 | `pipeline_GED_group_plot.py` | **Group plot.** For category-selective FF filters, plot preferred vs non-preferred (face vs object) time courses; trials balanced, reduced by RMS (filter sign is arbitrary). Config folder: `pipeline_GED_group_plot/`. |
 
-### Stage 3 — Activation: ERF (evoked responses)
+### Step 3 — Activation: ERF (evoked responses)
 Seen vs unseen (and vs blank) evoked responses, tested with CBPT + Bayesian.
 Four parallel families share the same 3-stage structure:
 
@@ -200,7 +231,7 @@ Four parallel families share the same 3-stage structure:
 | **VertROI** | `pipeline_erf_VertROI` · `…_group` · `…_group_plot` | IIT vertex-ROI source ERF. Group: `pipeline_erf_VertROI_group_IIT_baseline/`. |
 | **sensor** | `pipeline_erf_sensor` · `…_group` · `…_group_plot` | sensor-space ERF. Group: `pipeline_erf_sensor_group_0_1000/`. |
 
-### Stage 4 — Activation: TFR (oscillatory power)
+### Step 4 — Activation: TFR (oscillatory power)
 Log-power difference between conditions, 1–100 Hz multitaper (1–30 Hz: 1 taper,
 n_cycles=f/2; 30–100 Hz: 3 tapers, n_cycles=f/4). Two ROI families, each with a
 **band** analysis and a **freq×time (ft)** analysis:
@@ -218,18 +249,18 @@ n_cycles=f/2; 30–100 Hz: 3 tapers, n_cycles=f/4). Two ROI families, each with 
 - Configs: `pipeline_tfr_source_group_band_250_500/`, `…_band_baseline/`,
   `…_ft_250_500/`; `pipeline_tfr_VertROI_group_band_baseline/`, `…_ft_baseline/`.
 
-### Stage 5 — Baseline: contralateral alpha
+### Step 5 — Baseline: contralateral alpha
 | Script | Role |
 |--------|------|
 | `pipeline_contralateral_alpha.py` | **Individual.** Re-compute alpha-band Morlet power (needs long windows) for **all** trials in the ROI, keeping left/right hemisphere vertex indices. Config: `pipeline_contralateral_alpha/`. |
 | `pipeline_contralateral_alpha_group.py` | **Group.** Split trials by hemifield (LVF/RVF) × response, average power over contralateral vs ipsilateral vertices, pool locations → **contralateral power** (`contra_power`). Bayesian + CBPT on seen vs unseen. Config: `pipeline_contralateral_alpha_group_baseline/contra_power_baseline.json`. |
 | `pipeline_contralateral_alpha_group_plot.py` | **Group plot.** Contralateral-power time courses + significant clusters. |
 
-### Stage 6 — Synchronization (GNW: GED nodes · IIT: vertex nodes)
+### Step 6 — Synchronization (GNW: GED nodes · IIT: vertex nodes)
 Extract ROI time courses → compute connectivity per subject (with trial
 subsampling) → group statistics → plot.
 
-| Step | GNW (GED ROIs: FF vs PFC) | IIT (vertex ROIs: FF vs V1/V2) |
+| Stage | GNW (GED ROIs: FF vs PFC) | IIT (vertex ROIs: FF vs V1/V2) |
 |------|---------------------------|-------------------------------|
 | Time courses (individual) | `pipeline_syn_timecourse_GED_ROI.py` (project pre-computed GED filters → component time course) | `pipeline_syn_timecourse_PCA_VertROI.py` (PCA-flip vertex time course) |
 | Connectivity (individual, subsampled) | `pipeline_syn_subsampling_ppc_GED_ROI.py` (PPC) · `pipeline_syn_subsampling_dfc_GED_ROI.py` (DFC, Gaussian-Copula MI) | `pipeline_syn_subsampling_ppc_PCA_VertROI.py` (PPC) |
@@ -261,12 +292,21 @@ which script to run before it.
 
 ---
 
-## 7. Notes / conventions
+## 7. Notes
 
-- **Reducers**: `mean` vs `rms` over vertices/trials; RMS is used where a signal's
-  sign is arbitrary (e.g. GED filters, source vertices) so a signed mean would cancel.
+- **Averaging across vertices/trials**: results are combined either by a plain
+  `mean` or by root-mean-square (`rms`). `rms` is used whenever a signal's sign
+  is arbitrary — e.g. individual source vertices, where
+  positive and negative values carry no consistent meaning. In that case, a plain
+  mean would let positive and negative values cancel out and hide a real effect;
+  `rms` avoids this by summarizing magnitude only.
 - **Trial balancing**: unbalanced conditions are equalized by subsampling
   (`Nsample` draws, seed derived from the subject code).
-- **Reported statistics** favor Bayesian BF₀₁ (evidence for the null) alongside CBPT,
-  matching the preregistration.
-- Python 3.12+ is assumed (some f-strings use nested same-quote interpolation).
+
+### Attribution
+
+The `cog_plot/` folder is a modified copy of the
+[`cog_plot`](https://github.com/Cogitate-consortium/cog_plot) package, originally
+developed by [Alex Lepauvre](https://github.com/AlexLepauvre) as part of the
+Cogitate Consortium. It is included in this repository because I modified the
+original package and added new functions to support the analyses here.
