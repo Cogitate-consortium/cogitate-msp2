@@ -35,11 +35,10 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from demo_paths import BIDS_ROOT as _DP_BIDS  # noqa: E402
 
-DEFAULT_DERIVATIVES_PATH = (
-    "/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids/"
-    "derivatives/fslFeat"
-)
+DEFAULT_DERIVATIVES_PATH = str(_DP_BIDS / "derivatives" / "fslFeat")
 
 # Default root for scanning (override: CLI arg, or env DERIVATIVES_PATH)
 derivatives_path = DEFAULT_DERIVATIVES_PATH

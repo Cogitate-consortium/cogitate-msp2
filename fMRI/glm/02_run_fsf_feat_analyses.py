@@ -26,16 +26,21 @@ Modified by Yamil Vidal 08/05/2026
 """
 
 import os
+import sys
 import time
 
 import pandas as pd
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+from demo_paths import BIDS_ROOT, CODE_PATH, SUBJECT_CSV  # noqa: E402
+
 
 # %% Paths and Parameters
 
-projectRoot = '/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed'
-bids_dir = '/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids'
+bids_dir = str(BIDS_ROOT)
 fsl_output_dir = bids_dir + '/derivatives/fslFeat'
+# fsf templates live under CODE_PATH/glm/...
+projectRoot = str(BIDS_ROOT.parent) if BIDS_ROOT.name == 'bids' else str(BIDS_ROOT)
 
 # Whether to submit feat jobs using sbatch. If False only fsf files are created
 submit_jobs = True
@@ -64,7 +69,7 @@ analysis_definitions = {
         'label': 'ses-V2_task-VG_run-',
         'suffix': 'analysis-1stGLM_space-MNI152NLin2009cAsym',
         'runs': 8,
-        'fsf_file': '/code/glm/fsf_templates/1st_level',
+        'fsf_file': 'glm/fsf_templates/1st_level',
         'walltime': 8,
         'memory': 8,
     },
@@ -99,7 +104,7 @@ def get_analysis_labels(analysis_dict):
     """
     analyses = []
     analyses_suffix = analysis_dict['suffix']
-    fsf_templates_dir = bids_dir + analysis_dict['fsf_file']
+    fsf_templates_dir = os.path.join(str(CODE_PATH), analysis_dict['fsf_file'])
     for run in range(analysis_dict['runs']):
         analyses.append(analysis_dict['label'] + str(run + 1))
     return analyses, analyses_suffix, fsf_templates_dir
@@ -277,7 +282,7 @@ def run_fsf_creation_and_submit_feat_job(
 
 # %% run
 if __name__ == '__main__':
-    subject_list = projectRoot + '/bids/code/ses-v2-analysis-subs-fmri.csv'
+    subject_list = str(SUBJECT_CSV)
     subj_df = pd.read_csv(subject_list, sep=None, engine='python')
     if 'sub_code' not in subj_df.columns and len(subj_df.columns) == 1 and ';' in subj_df.columns[0]:
         subj_df = pd.read_csv(subject_list, sep=';')

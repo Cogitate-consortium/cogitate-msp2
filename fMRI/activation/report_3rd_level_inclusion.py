@@ -17,6 +17,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+from demo_paths import BIDS_ROOT as _DP_BIDS, CODE_PATH as _DP_CODE  # noqa: E402
+
 
 SESSION = "ses-V2"
 ANAT_SESSIONS = ("ses-V1", "ses-V2")
@@ -53,8 +58,8 @@ DEFAULT_ANALYSES = (
 )
 
 # Defaults match activation/make_3rd_level_inclusion_report.sh (override via env or CLI).
-DEFAULT_BIDS_ROOT = "/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-DEFAULT_CODE_ROOT = f"{DEFAULT_BIDS_ROOT}/code"
+DEFAULT_BIDS_ROOT = str(_DP_BIDS)
+DEFAULT_CODE_ROOT = str(_DP_CODE)
 DEFAULT_ACTIVATION_ROOT = f"{DEFAULT_CODE_ROOT}/activation"
 
 

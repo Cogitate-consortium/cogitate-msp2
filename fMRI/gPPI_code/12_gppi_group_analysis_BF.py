@@ -14,14 +14,14 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 import pingouin as pg
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+from demo_paths import BIDS_ROOT as _DP_BIDS  # noqa: E402
+
 
 # Match BIDS root used by other gPPI scripts (override with $BIDS_ROOT if needed).
-DEFAULT_BIDS_ROOT = Path(
-    os.environ.get(
-        "BIDS_ROOT",
-        "/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids",
-    )
-)
+DEFAULT_BIDS_ROOT = Path(os.environ.get("BIDS_ROOT", str(_DP_BIDS)))
 BIDS_ROOT = Path(os.environ.get("BIDS_ROOT", str(DEFAULT_BIDS_ROOT)))
 
 # 3rd-level group FEAT outputs (see 09_make_fsf_files_3rdlevel.sh / fsf template).

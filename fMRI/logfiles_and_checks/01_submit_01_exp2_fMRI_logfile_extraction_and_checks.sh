@@ -5,11 +5,13 @@
 #
 # Usage: bash 01_submit_01_exp2_fMRI_logfile_extraction_and_checks.sh [--force]
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 set -euo pipefail
 
-BIDS_ROOT="${BIDS_ROOT:-/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids}"
-CODE_PATH="${CODE_PATH:-${BIDS_ROOT}/code}"
-SUBJECT_CSV="${SUBJECT_CSV:-${CODE_PATH}/ses-v2-analysis-subs-fmri.csv}"
 LOGFILES_ROOT="${CODE_PATH}/logfiles_and_checks"
 EXTRACTION_SCRIPT="${LOGFILES_ROOT}/exp2_fMRI_logfile_extraction_and_checks.py"
 JOB_FILES_ROOT="${LOGFILES_ROOT}/job_files/exp2_logfile_extraction"

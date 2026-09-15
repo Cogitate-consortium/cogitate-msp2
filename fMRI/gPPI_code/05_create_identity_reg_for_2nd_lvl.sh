@@ -11,11 +11,13 @@
 #
 # Requires FSL in PATH. Shared fallbacks/QC: glm/identity_reg_for_2nd_lvl.sh
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 module load FSL
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
 GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 JOB_FILES_ROOT="${GPPI_CODE_ROOT}/job_files/create_identity_reg_for_2nd_lvl"

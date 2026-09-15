@@ -8,12 +8,15 @@
 #
 # Usage: bash 08_overlap.sh
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 module load FSL
 
 export OPENBLAS_NUM_THREADS=1
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
 ACTIVATION_CODE_ROOT="${CODE_PATH}/activation"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 RESULTS_DIR="${ACTIVATION_CODE_ROOT}/results"

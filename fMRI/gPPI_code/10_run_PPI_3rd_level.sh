@@ -18,13 +18,15 @@
 #
 # Usage: bash 10_run_PPI_3rd_level.sh
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 export OPENBLAS_NUM_THREADS=1
 
 module load FSL 2>/dev/null || true
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
 FSF_FILES_ROOT="${GPPI_CODE_ROOT}/fsf_files/group"

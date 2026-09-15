@@ -7,11 +7,13 @@
 #
 # Usage: bash make_3rd_level_inclusion_report.sh
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 set -euo pipefail
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
 ACTIVATION_CODE_ROOT="${CODE_PATH}/activation"
 REPORT_DIR="${ACTIVATION_CODE_ROOT}/3rd level report"
 FSF_FILES_ROOT="${ACTIVATION_CODE_ROOT}/fsf_files/group"

@@ -6,9 +6,11 @@
 # Build combined Seen/Unseen FIR *_Shifted.txt event files per run.
 # Subjects: BASELINE_min_seen_unseen == TRUE (see fir_variants.sh).
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 FIR_CODE_ROOT="${CODE_PATH}/FIR"
 EV_FILES_ROOT="${BIDS_ROOT}/derivatives/regressoreventfiles"
 

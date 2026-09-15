@@ -31,10 +31,10 @@ from gppi_evc_paths import (
     resolve_2nd_stat,
 )
 
-DEFAULT_DEST = Path(
-    "/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-    "/derivatives/gppi/2nd_lvl"
-)
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from demo_paths import BIDS_ROOT as _DP_BIDS  # noqa: E402
+
+DEFAULT_DEST = _DP_BIDS / "derivatives" / "gppi" / "2nd_lvl"
 
 
 @dataclass

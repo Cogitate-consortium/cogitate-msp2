@@ -21,16 +21,13 @@ import pandas as pd
 
 CODE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(CODE_DIR))
+sys.path.insert(0, str(CODE_DIR.parent))
 
-from roi_definitions import GNW_roi_list, IIT_roi_list, roi_list
+from demo_paths import BIDS_ROOT as _DP_BIDS  # noqa: E402
+from roi_definitions import GNW_roi_list, IIT_roi_list, roi_list  # noqa: E402
 
 # Match BIDS root used by other gPPI scripts (override with $BIDS_ROOT if needed).
-DEFAULT_BIDS_ROOT = Path(
-    os.environ.get(
-        "BIDS_ROOT",
-        "/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids",
-    )
-)
+DEFAULT_BIDS_ROOT = Path(os.environ.get("BIDS_ROOT", str(_DP_BIDS)))
 BIDS_ROOT = Path(os.environ.get("BIDS_ROOT", str(DEFAULT_BIDS_ROOT)))
 
 # Bayes Factor maps from 12_gppi_group_analysis_BF.py

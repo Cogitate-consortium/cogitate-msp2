@@ -28,6 +28,9 @@ import pandas as pd
 import numpy as np
 import os, glob, sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+from demo_paths import BIDS_ROOT, SUBJECT_CSV, SESSION  # noqa: E402
+
 
 #%% Paths and Parameters
 
@@ -38,8 +41,8 @@ import os, glob, sys
 confound_regressor_set = '24motion_CSF_WM'
 
 
-# BIDS path
-bids_dir = '/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids'
+# BIDS path (override with BIDS_ROOT / DEMO=1 via demo_paths)
+bids_dir = str(BIDS_ROOT)
 
 # input file (from fmriprep)
 fmriprep_confound_file_pattern = bids_dir + '/derivatives/fmriprep/%(sub)s/%(ses)s/func/%(sub)s_%(ses)s_%(task)s_desc-confounds_timeseries.tsv'
@@ -52,7 +55,7 @@ event_file_output_pattern = '%(sub)s_%(ses)s_%(task)s_confounds.txt'
 
 # session list
 #session_labels = ['ses-V1', 'ses-V2']
-session_labels = ['ses-V2']
+session_labels = [SESSION]
 
 # dummy volumes (removed from beginning of confound tsv file)
 n_dummy_volumes = 3
@@ -201,11 +204,8 @@ if __name__ == '__main__':
     #subject_list_type = 'debug'
     #subjects = get_subject_list(bids_dir,subject_list_type)
     
-    projectRoot = '/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed'
-    
-    # subject list (determines on which subjects scripts are run)
-    
-    subject_list = projectRoot + '/bids/code/ses-v2-analysis-subs-fmri.csv'
+    # subject list from demo_paths (SUBJECT_CSV / DEMO-aware)
+    subject_list = str(SUBJECT_CSV)
     subj_df = pd.read_csv(subject_list, sep=None, engine='python')
     # Some QC subject lists are semicolon-separated (e.g. "sub_code;modality;Lab;...").
     # If pandas inferred a single wide column name, re-read explicitly with ';'.

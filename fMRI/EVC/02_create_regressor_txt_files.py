@@ -38,20 +38,18 @@ stimulusDuration = 15.25
 TR = 1.5
 nDummyVols = 3
 
-##### Paths (override via environment on cluster) #####
-BIDS_ROOT = os.environ.get(
-    'BIDS_ROOT',
-    '/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids',
-)
-CODE_PATH = os.environ.get(
-    'CODE_PATH',
-    os.path.join(BIDS_ROOT, 'derivatives', 'exclude', 'new', 'fMRI_exp2'),
-)
+##### Paths (override via environment / DEMO=1 via demo_paths) #####
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+from demo_paths import BIDS_ROOT as _BIDS, CODE_PATH as _CODE, SUBJECT_CSV as _SUBCSV  # noqa: E402
+
+BIDS_ROOT = os.environ.get('BIDS_ROOT', str(_BIDS))
+CODE_PATH = os.environ.get('CODE_PATH', str(_CODE))
 _CANONICAL_REGRESSOR_ROOT = os.path.join(
-    BIDS_ROOT, 'derivatives', 'exclude', 'new', 'regressoreventfiles',
+    BIDS_ROOT, 'derivatives', 'regressoreventfiles',
 )
 REGRESSOR_EVENT_ROOT = os.environ.get('REGRESSOR_EVENT_ROOT', _CANONICAL_REGRESSOR_ROOT)
 FMRIPREP_ROOT = os.path.join(BIDS_ROOT, 'derivatives', 'fmriprep')
+SUBJECT_CSV = os.environ.get('SUBJECT_CSV', str(_SUBCSV))
 
 
 def _assert_canonical_regressor_root(root):
@@ -61,19 +59,10 @@ def _assert_canonical_regressor_root(root):
             'REGRESSOR_EVENT_ROOT must be under derivatives/regressoreventfiles: '
             f'{root}'
         )
-    if '/derivatives/regressoreventfiles' in norm and '/derivatives/regressoreventfiles' not in norm:
-        raise ValueError(
-            'REGRESSOR_EVENT_ROOT must not use legacy derivatives/regressoreventfiles: '
-            f'{root}'
-        )
 
 
 _assert_canonical_regressor_root(REGRESSOR_EVENT_ROOT)
 
-SUBJECT_CSV = os.environ.get(
-    'SUBJECT_CSV',
-    os.path.join(CODE_PATH, 'ses-v2-analysis-subs-fmri.csv'),
-)
 SUBJECT_CSV_COLUMNS = os.environ.get(
     'SUBJECT_CSV_COLUMNS',
     'SYNCHRONY_min_seen',

@@ -1,11 +1,13 @@
 # Shared paths and naming for the EVC localizer / ROI pipeline.
 # Source from other EVC scripts:  source "$(dirname "${BASH_SOURCE[0]}")/evc_config.sh"
 
-BIDS_ROOT="${BIDS_ROOT:-/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids}"
-CODE_PATH="${CODE_PATH:-${BIDS_ROOT}/code}"
-SUBJECT_CSV="${SUBJECT_CSV:-${CODE_PATH}/ses-v2-analysis-subs-fmri.csv}"
 
 # Subjects with TRUE in SYNCHRONY_min_seen (same cohort as gPPI synchrony analyses).
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 SUBJECT_CSV_COLUMNS="${SUBJECT_CSV_COLUMNS:-SYNCHRONY_min_seen}"
 # Optional: set SUBJECT_CSV_COLUMN alone to filter a single column instead of SUBJECT_CSV_COLUMNS.
 SUBJECT_CSV_COLUMN="${SUBJECT_CSV_COLUMN:-}"

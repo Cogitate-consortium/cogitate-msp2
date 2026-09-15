@@ -9,13 +9,15 @@
 #   bash inspect_2nd_level_for_3rd.sh
 #   bash inspect_2nd_level_for_3rd.sh --simulate-mask   # also run fslmaths mask -Tmin simulation
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 set -euo pipefail
 
 module load FSL 2>/dev/null || true
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
 GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 REPORT_DIR="${GPPI_CODE_ROOT}/3rd level report"

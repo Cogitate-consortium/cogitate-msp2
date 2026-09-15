@@ -9,15 +9,17 @@
 
 #module load FSL
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 echo "$FSLDIR"
 export OPENBLAS_NUM_THREADS=1
 
 # ---------------------------------------------------------------------------
 # Paths (nested: BIDS → fMRI_exp2 → gPPI_code → outputs / job files)
 # ---------------------------------------------------------------------------
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
 GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
 FSF_FILES_ROOT="${GPPI_CODE_ROOT}/fsf_files"
 JOB_FILES_ROOT="${GPPI_CODE_ROOT}/job_files/run_PPI_1st_level"

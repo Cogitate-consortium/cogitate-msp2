@@ -8,11 +8,13 @@
 #
 # Usage: bash 06_run_FIR_2nd_level_VG.sh
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 export OPENBLAS_NUM_THREADS=1
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
 FIR_CODE_ROOT="${CODE_PATH}/FIR"
 FSF_FILES_ROOT="${FIR_CODE_ROOT}/fsf_files"
 JOB_FILES_ROOT="${FIR_CODE_ROOT}/job_files/run_FIR_2nd_level"

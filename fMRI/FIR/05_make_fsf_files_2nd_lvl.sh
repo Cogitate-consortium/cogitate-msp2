@@ -8,9 +8,11 @@
 #
 # Usage: bash 05_make_fsf_files_2nd_lvl.sh
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 FIR_CODE_ROOT="${CODE_PATH}/FIR"
 FSF_TEMPLATE_DIR="${FIR_CODE_ROOT}/fsf_templates"
 FSF_FILES_ROOT="${FIR_CODE_ROOT}/fsf_files"

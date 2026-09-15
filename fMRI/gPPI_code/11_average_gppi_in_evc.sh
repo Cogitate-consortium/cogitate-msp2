@@ -6,16 +6,18 @@
 # Usage: bash 11_average_gppi_in_evc.sh
 
 # Load FSL
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 module load FSL
 
-BIDS_ROOT="${BIDS_ROOT:-/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids}"
-CODE_PATH="${CODE_PATH:-${BIDS_ROOT}/code}"
 GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 EVC_ROIS_ROOT="${BIDS_ROOT}/derivatives/evc_rois"
 
 analysis="SYNCHRONY_min_seen"
-SUBJECT_CSV="${SUBJECT_CSV:-${CODE_PATH}/ses-v2-analysis-subs-fmri.csv}"
 SUBJECT_CSV_COLUMN="${SUBJECT_CSV_COLUMN:-${analysis}}"
 
 # shellcheck source=../EVC/evc_config.sh

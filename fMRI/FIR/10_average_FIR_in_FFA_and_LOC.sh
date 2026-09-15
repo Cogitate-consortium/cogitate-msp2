@@ -9,11 +9,13 @@
 #
 # Usage: bash 10_average_FIR_in_FFA_and_LOC.sh
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=../demo_paths.sh
+source "${_CODE_ROOT}/demo_paths.sh"
+
 module load FSL
 
-BIDS_ROOT="/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
-CODE_PATH="${BIDS_ROOT}/code"
-SUBJECT_CSV="${CODE_PATH}/ses-v2-analysis-subs-fmri.csv"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 SEEDS_ROOT="${BIDS_ROOT}/derivatives/gppi_seeds"
 FIR_DERIV_ROOT="${BIDS_ROOT}/derivatives/fir"

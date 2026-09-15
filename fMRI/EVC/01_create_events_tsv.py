@@ -48,15 +48,12 @@ nExpectedNullEVs = 2
 TR = 1.5
 nDummyVols = 3
 
-##### Paths (override via environment on cluster) #####
-BIDS_ROOT = os.environ.get(
-    'BIDS_ROOT',
-    '/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids',
-)
-CODE_PATH = os.environ.get(
-    'CODE_PATH',
-    os.path.join(BIDS_ROOT, 'derivatives', 'exclude', 'new', 'fMRI_exp2'),
-)
+##### Paths (override via environment / DEMO=1 via demo_paths) #####
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+from demo_paths import BIDS_ROOT as _DP_BIDS, CODE_PATH as _DP_CODE, SUBJECT_CSV as _DP_SUBCSV  # noqa: E402
+
+BIDS_ROOT = os.environ.get('BIDS_ROOT', str(_DP_BIDS))
+CODE_PATH = os.environ.get('CODE_PATH', str(_DP_CODE))
 RAW_DIR = os.environ.get(
     'RAW_DIR',
     '/mnt/beegfs/XNAT/COGITATE/fMRI/Raw/projects/CoG_fMRI_PhaseII',
@@ -89,10 +86,7 @@ outputErrorFlagPattern = os.path.join(
     'sub-{sub}_ses-{ses}-EVCLoc_errorFlags.csv',
 )
 
-SUBJECT_CSV = os.environ.get(
-    'SUBJECT_CSV',
-    os.path.join(CODE_PATH, 'ses-v2-analysis-subs-fmri.csv'),
-)
+SUBJECT_CSV = os.environ.get('SUBJECT_CSV', str(_DP_SUBCSV))
 SUBJECT_CSV_COLUMNS = os.environ.get('SUBJECT_CSV_COLUMNS', 'SYNCHRONY_min_seen')
 SUBJECT_CSV_COLUMN = os.environ.get('SUBJECT_CSV_COLUMN', '').strip()
 
