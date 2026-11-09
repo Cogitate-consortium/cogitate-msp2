@@ -60,6 +60,8 @@ _ACTIVATION_GROUP_GFEAT = re.compile(
 CODE_SUBDIR_BY_FSLFEAT_ANALYSIS: dict[str, str] = {
     "activation": "activation",
     "gPPI": "gPPI_code/dAT-seen",
+    "gPPI_AT-seen-go": "gPPI_code/AT-seen-go",
+    "gPPI_AT-seen-no-go": "gPPI_code/AT-seen-no-go",
     "FIR": "FIR",
     "EVC": "EVC",
     "glm": "glm",
@@ -82,6 +84,34 @@ JOB_SUBDIRS_BY_ANALYSIS_LEVEL: dict[str, dict[str, tuple[str, ...]]] = {
         ),
     },
     "gPPI": {
+        "1st": (
+            "job_files/run_PPI_1st_level",
+            "job_files/make_timecourse_files",
+        ),
+        "2nd": (
+            "job_files/run_PPI_2nd_level",
+            "job_files/create_identity_reg_for_2nd_lvl",
+        ),
+        "3rd": (
+            "job_files/run_PPI_3rd_level",
+            "job_files/create_identity_reg_for_3rd_lvl",
+        ),
+    },
+    "gPPI_AT-seen-go": {
+        "1st": (
+            "job_files/run_PPI_1st_level",
+            "job_files/make_timecourse_files",
+        ),
+        "2nd": (
+            "job_files/run_PPI_2nd_level",
+            "job_files/create_identity_reg_for_2nd_lvl",
+        ),
+        "3rd": (
+            "job_files/run_PPI_3rd_level",
+            "job_files/create_identity_reg_for_3rd_lvl",
+        ),
+    },
+    "gPPI_AT-seen-no-go": {
         "1st": (
             "job_files/run_PPI_1st_level",
             "job_files/make_timecourse_files",

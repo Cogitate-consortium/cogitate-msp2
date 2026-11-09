@@ -297,7 +297,7 @@ bash make_3rd_level_inclusion_report.sh
 
 **Purpose:** Generalized psychophysiological interaction (gPPI) with **FFA** and **LOC** seeds; group-level maps for `PPI_FFA` (cope 3) and `PPI_LOC` (cope 4).
 
-Pipelines are organized by task condition under `gPPI_code/`. The **dAT-seen** (task-VG) pipeline lives in `gPPI_code/dAT-seen/` (below). AT-seen-go / AT-seen-no-go pipelines can be added as sibling folders later.
+Pipelines are organized by task condition under `gPPI_code/`: **dAT-seen** (task-VG), **AT-seen-go** (task-Replay Hits), and **AT-seen-no-go** (task-Replay Correctrejects).
 
 **Extra dependencies:** Event files from §2; seed masks in `gppi_seeds/` (Experiment 1); fMRIPrep MNI BOLD; EVC ROIs from §3 (optional follow-up only). Subjects: `SYNCHRONY_min_seen == TRUE`.
 
@@ -366,6 +366,58 @@ cd "${CODE_PATH}/gPPI_code/dAT-seen"
 bash inspect_2nd_level_for_3rd.sh
 
 # Copy 2nd-level stat maps → derivatives/gppi/2nd_lvl/
+bash run_copy_gppi_2nd_lvl_for_evc.sh
+```
+
+#### 6b. AT-seen-go (`gPPI_code/AT-seen-go/`)
+
+Same preferred-vs-non-preferred FFA/LOC gPPI as §6a, for **AT-seen-go** (task-Replay, runs 1–4). Psychological EVs are built from **Hit** (TruePositive go) face/object trials; FEAT outputs go under `fslFeat/gPPI_AT-seen-go/`.
+
+```bash
+cd "${CODE_PATH}/gPPI_code/AT-seen-go"
+
+bash 01_create_ev_files.sh          # HitFace/HitObject → *_prefer_{Face,Object}.txt
+bash 02_make_timecourse_files.sh    # Replay-run seed timecourses
+bash 03_make_fsf_files.sh
+bash 04_run_PPI_1st_level.sh
+bash 05_create_identity_reg_for_2nd_lvl.sh
+bash 06_make_fsf_files_2ndlevel.sh
+bash 07_run_PPI_2nd_level_Replay.sh
+bash 08_create_identity_reg_for_3rd_lvl.sh
+bash 09_make_fsf_files_3rdlevel.sh
+bash 10_run_PPI_3rd_level.sh
+bash run_average_gppi_in_evc.sh     # → derivatives/gppi/AT-seen-go/
+python3 12_gppi_group_analysis_BF.py   # → derivatives/bf/AT-seen-go/
+python3 13_gppi_group_level_tables_BF.py
+
+bash make_3rd_level_inclusion_report.sh
+bash inspect_2nd_level_for_3rd.sh
+bash run_copy_gppi_2nd_lvl_for_evc.sh
+```
+
+#### 6c. AT-seen-no-go (`gPPI_code/AT-seen-no-go/`)
+
+Same preferred-vs-non-preferred FFA/LOC gPPI as §6a–6b, for **AT-seen-no-go** (task-Replay, runs 1–4). Psychological EVs are built from **Correctreject** (TrueNegative no-go) face/object trials; prefer files are `*_prefer_{Face,Object}_nogo.txt` (do not overwrite AT-seen-go). FEAT outputs go under `fslFeat/gPPI_AT-seen-no-go/`.
+
+```bash
+cd "${CODE_PATH}/gPPI_code/AT-seen-no-go"
+
+bash 01_create_ev_files.sh          # CorrectrejectFace/Object → *_prefer_{Face,Object}_nogo.txt
+bash 02_make_timecourse_files.sh
+bash 03_make_fsf_files.sh
+bash 04_run_PPI_1st_level.sh
+bash 05_create_identity_reg_for_2nd_lvl.sh
+bash 06_make_fsf_files_2ndlevel.sh
+bash 07_run_PPI_2nd_level_Replay.sh
+bash 08_create_identity_reg_for_3rd_lvl.sh
+bash 09_make_fsf_files_3rdlevel.sh
+bash 10_run_PPI_3rd_level.sh
+bash run_average_gppi_in_evc.sh     # → derivatives/gppi/AT-seen-no-go/
+python3 12_gppi_group_analysis_BF.py   # → derivatives/bf/AT-seen-no-go/
+python3 13_gppi_group_level_tables_BF.py
+
+bash make_3rd_level_inclusion_report.sh
+bash inspect_2nd_level_for_3rd.sh
 bash run_copy_gppi_2nd_lvl_for_evc.sh
 ```
 
@@ -549,6 +601,8 @@ fMRI/
 ├── activation/              # Seen vs unseen face/object GLM
 ├── gPPI_code/               # FFA/LOC psychophysiological interaction
 │   ├── dAT-seen/            # dAT-seen (task-VG) gPPI pipeline
+│   ├── AT-seen-go/          # AT-seen-go (task-Replay Hits) gPPI pipeline
+│   ├── AT-seen-no-go/       # AT-seen-no-go (task-Replay Correctreject) gPPI
 │   └── gPPI_analyses_description/  # planned vs run notes (local)
 ├── FIR/                     # FIR timecourse models
 ├── decoding/                # nibetaseries decoding (see decoding/readme.md)

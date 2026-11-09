@@ -4,6 +4,7 @@ Reset identity-registration artifacts for 2nd-level FEAT prep (activation, gPPI,
 
 Reverses changes from ``glm/identity_reg_for_2nd_lvl.sh`` and pipeline scripts:
 ``activation/02_create_identity_reg_for_2nd_lvl.sh``, ``gPPI_code/dAT-seen/05_...``,
+``gPPI_code/AT-seen-go/05_...``, ``gPPI_code/AT-seen-no-go/05_...``,
 ``FIR/04_create_identity_reg_for_2nd_lvl.sh``.
 
 For each selected analysis this tool can:
@@ -15,7 +16,8 @@ For each selected analysis this tool can:
 Does **not** delete ``.feat`` / ``.gfeat`` trees — use ``delete_fslfeat_derivatives.py``
 for that.
 
-Supported ``--analysis`` values: ``activation``, ``gPPI``, ``FIR``, or ``all``
+Supported ``--analysis`` values: ``activation``, ``gPPI``, ``gPPI_AT-seen-go``,
+``gPPI_AT-seen-no-go``, ``FIR``, or ``all``
 (intersection with folders under fslFeat that support identity reg).
 Not supported: ``glm``, ``group``, ``EVC``.
 
@@ -53,6 +55,8 @@ from delete_fslfeat_derivatives import (
 IDENTITY_REG_ANALYSES: tuple[str, ...] = (
     "activation",
     "gPPI",
+    "gPPI_AT-seen-go",
+    "gPPI_AT-seen-no-go",
     "FIR",
 )
 
@@ -183,7 +187,7 @@ def feat_matches_identity_analysis(feat_dir: Path, analysis: str) -> bool:
     """Extra basename checks beyond feat_matches_level(..., '1st')."""
     name = feat_dir.name
     namel = name.lower()
-    if analysis == "gPPI":
+    if analysis in ("gPPI", "gPPI_AT-seen-go", "gPPI_AT-seen-no-go"):
         return bool(_GPPI_1ST_BASENAME.search(name))
     if analysis == "FIR":
         return (
