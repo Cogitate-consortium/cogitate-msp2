@@ -59,7 +59,7 @@ _ACTIVATION_GROUP_GFEAT = re.compile(
 # fslFeat top-level folder -> directory under code root containing job_files/
 CODE_SUBDIR_BY_FSLFEAT_ANALYSIS: dict[str, str] = {
     "activation": "activation",
-    "gPPI": "gPPI_code",
+    "gPPI": "gPPI_code/dAT-seen",
     "FIR": "FIR",
     "EVC": "EVC",
     "glm": "glm",

@@ -9,8 +9,8 @@
 
 # Subjects from ses-v2-analysis-subs-fmri.csv with SYNCHRONY_min_seen == TRUE only
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 EV_FILES_ROOT="${BIDS_ROOT}/derivatives/regressoreventfiles"

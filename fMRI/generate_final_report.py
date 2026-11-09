@@ -24,7 +24,7 @@ DEFAULT_BIDS_ROOT = "/mnt/beegfs/XNAT/COGITATE/fMRI/phase_2/processed/bids"
 DEFAULT_CODE_ROOT = f"{DEFAULT_BIDS_ROOT}/code"
 DEFAULT_ACTIVATION_ROOT = f"{DEFAULT_CODE_ROOT}/activation"
 DEFAULT_FIR_ROOT = f"{DEFAULT_CODE_ROOT}/FIR"
-DEFAULT_GPPI_ROOT = f"{DEFAULT_CODE_ROOT}/gPPI_code"
+DEFAULT_GPPI_ROOT = f"{DEFAULT_CODE_ROOT}/gPPI_code/dAT-seen"
 DEFAULT_TIMECOURSE_ROOT = f"{DEFAULT_BIDS_ROOT}/derivatives/gppi_timecourse"
 
 FIR_VARIANTS = ("FIR",)
@@ -118,7 +118,7 @@ def load_module(name: str, path: Path) -> Any:
 def load_pipeline_modules(code_root: Path) -> dict[str, Any]:
     activation_dir = code_root / "activation"
     fir_dir = code_root / "FIR"
-    gppi_dir = code_root / "gPPI_code"
+    gppi_dir = code_root / "gPPI_code" / "dAT-seen"
 
     fir_roi = load_module("report_fir_roi_inclusion", fir_dir / "report_fir_roi_inclusion.py")
     fir_3rd = load_module("report_fir_3rd_level_inclusion", fir_dir / "report_fir_3rd_level_inclusion.py")
@@ -141,7 +141,7 @@ def run_refresh(code_root: Path, pipelines: set[str]) -> None:
     scripts = {
         "activation": code_root / "activation" / "make_3rd_level_inclusion_report.sh",
         "fir": code_root / "FIR" / "make_fir_3rd_level_inclusion_report.sh",
-        "gppi": code_root / "gPPI_code" / "make_3rd_level_inclusion_report.sh",
+        "gppi": code_root / "gPPI_code" / "dAT-seen" / "make_3rd_level_inclusion_report.sh",
     }
     for key, script in scripts.items():
         if key not in pipelines:
@@ -240,12 +240,12 @@ def infer_rerun_step(
             [
                 (
                     r"\[event EV\]|prefer_Face|prefer_Object",
-                    "gPPI_code/01_create_ev_files.sh",
+                    "gPPI_code/dAT-seen/01_create_ev_files.sh",
                     "Regenerate gPPI event files, then rerun downstream steps.",
                 ),
                 (
                     r"\[timecourse|02_make_timecourse_files",
-                    "gPPI_code/02_make_timecourse_files.sh",
+                    "gPPI_code/dAT-seen/02_make_timecourse_files.sh",
                     "Extract seed timecourses before 1st-level PPI.",
                 ),
                 (
@@ -267,18 +267,18 @@ def infer_rerun_step(
                 r"04_create_identity_reg|missing identity reg \(05_create",
                 "FIR/04_create_identity_reg_for_2nd_lvl.sh"
                 if pipeline == "fir"
-                else "gPPI_code/05_create_identity_reg_for_2nd_lvl.sh",
+                else "gPPI_code/dAT-seen/05_create_identity_reg_for_2nd_lvl.sh",
                 "Create identity registration matrices for 2nd-level FEAT.",
             ),
             (
                 r"05_create_identity_reg",
-                "gPPI_code/05_create_identity_reg_for_2nd_lvl.sh",
+                "gPPI_code/dAT-seen/05_create_identity_reg_for_2nd_lvl.sh",
                 "Create identity registration matrices for 2nd-level PPI.",
             ),
             (
                 r"08_create_identity_reg|07_create_identity_reg|missing identity reg at \.gfeat root",
                 {
-                    "gppi": "gPPI_code/08_create_identity_reg_for_3rd_lvl.sh",
+                    "gppi": "gPPI_code/dAT-seen/08_create_identity_reg_for_3rd_lvl.sh",
                     "fir": "FIR/07_create_identity_reg_for_3rd_lvl.sh",
                 }.get(pipeline, "create_identity_reg_for_3rd_lvl.sh"),
                 "Create identity registration at 2nd-level .gfeat roots for 3rd-level FEAT.",
@@ -289,7 +289,7 @@ def infer_rerun_step(
                 {
                     "activation": "glm/02_run_fsf_feat_analyses.py",
                     "fir": "FIR/03_run_FIR_1st_level.sh",
-                    "gppi": "gPPI_code/04_run_PPI_1st_level.sh",
+                    "gppi": "gPPI_code/dAT-seen/04_run_PPI_1st_level.sh",
                 }.get(pipeline, "1st-level FEAT"),
                 "Fix or re-run 1st-level FEAT for affected run(s), then 2nd/3rd level.",
             ),
@@ -300,7 +300,7 @@ def infer_rerun_step(
                 {
                     "activation": "activation/04_run_2nd_level.sh",
                     "fir": "FIR/06_run_FIR_2nd_level_VG.sh",
-                    "gppi": "gPPI_code/07_run_PPI_2nd_level_VG.sh",
+                    "gppi": "gPPI_code/dAT-seen/07_run_PPI_2nd_level_VG.sh",
                 }.get(pipeline, "2nd-level FEAT"),
                 "Re-run 2nd-level FEAT after 1st-level outputs are OK.",
             ),
@@ -315,9 +315,9 @@ def infer_rerun_step(
                         "FIR/09_run_FIR_3rd_level.sh"
                     ),
                     "gppi": (
-                        "gPPI_code/08_create_identity_reg_for_3rd_lvl.sh then "
-                        "gPPI_code/09_make_fsf_files_3rdlevel.sh then "
-                        "gPPI_code/10_run_PPI_3rd_level.sh"
+                        "gPPI_code/dAT-seen/08_create_identity_reg_for_3rd_lvl.sh then "
+                        "gPPI_code/dAT-seen/09_make_fsf_files_3rdlevel.sh then "
+                        "gPPI_code/dAT-seen/10_run_PPI_3rd_level.sh"
                     ),
                 }.get(pipeline, "3rd-level FEAT"),
                 "Refresh 3rd-level FSF / group FEAT after 2nd-level is complete.",
@@ -854,7 +854,7 @@ def main() -> int:
         "feat_root": bids_root / "derivatives/fslFeat",
         "activation_root": code_root / "activation",
         "fir_root": code_root / "FIR",
-        "gppi_root": code_root / "gPPI_code",
+        "gppi_root": code_root / "gPPI_code" / "dAT-seen",
         "seeds_root": bids_root / "derivatives/gppi_seeds",
         "timecourse_root": Path(
             os.environ.get("TIMECOURSE_ROOT", DEFAULT_TIMECOURSE_ROOT)
@@ -876,11 +876,13 @@ def main() -> int:
         / "included_subjects_report.txt",
         "gppi_inclusion_report": code_root
         / "gPPI_code"
+        / "dAT-seen"
         / "fsf_files"
         / "group"
         / "included_subjects_report.txt",
         "gppi_runs_report": code_root
         / "gPPI_code"
+        / "dAT-seen"
         / "job_files"
         / "run_PPI_2nd_level"
         / "included_runs_report.txt",

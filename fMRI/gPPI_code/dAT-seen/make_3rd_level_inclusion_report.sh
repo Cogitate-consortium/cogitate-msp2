@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #@author: Yamil Vidal (05/2026)
-# Build gPPI 3rd-level inclusion report under gPPI_code/3rd level report/.
+# Build gPPI 3rd-level inclusion report under gPPI_code/dAT-seen/3rd level report/.
 # Lists included subjects per analysis/cope and traces missing derivatives for
 # exclusions (seeds, anatomical masks, structural images, events, fmriprep, FEAT).
 # Called from 10_run_PPI_3rd_level.sh (after job submission).
@@ -9,13 +9,13 @@
 # Usage: bash make_3rd_level_inclusion_report.sh
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 set -euo pipefail
 
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 TIMECOURSE_ROOT="${BIDS_ROOT}/derivatives/gppi_timecourse"
 REPORT_DIR="${GPPI_CODE_ROOT}/3rd level report"
 FSF_FILES_ROOT="${GPPI_CODE_ROOT}/fsf_files/group"

@@ -16,7 +16,7 @@ import numpy as np
 import pingouin as pg
 import sys
 from pathlib import Path as _Path
-sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))
 from demo_paths import BIDS_ROOT as _DP_BIDS  # noqa: E402
 
 

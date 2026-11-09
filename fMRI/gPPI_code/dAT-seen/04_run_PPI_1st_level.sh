@@ -10,17 +10,17 @@
 #module load FSL
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 echo "$FSLDIR"
 export OPENBLAS_NUM_THREADS=1
 
 # ---------------------------------------------------------------------------
-# Paths (nested: BIDS → fMRI_exp2 → gPPI_code → outputs / job files)
+# Paths (nested: BIDS → fMRI → gPPI_code/dAT-seen → outputs / job files)
 # ---------------------------------------------------------------------------
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 FSF_FILES_ROOT="${GPPI_CODE_ROOT}/fsf_files"
 JOB_FILES_ROOT="${GPPI_CODE_ROOT}/job_files/run_PPI_1st_level"
 SLURM_TEMPLATE="${GPPI_CODE_ROOT}/slurm_templates/PPI_1st_lvl.sh"

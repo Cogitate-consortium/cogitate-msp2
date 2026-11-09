@@ -7,11 +7,11 @@
 
 # Use the same subject list and filtering as in 02_make_timecourse_files.sh
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 FSF_TEMPLATE_DIR="${GPPI_CODE_ROOT}/fsf_templates"
 FSF_FILES_ROOT="${GPPI_CODE_ROOT}/fsf_files"
 FMRIPREP_ROOT="${BIDS_ROOT}/derivatives/fmriprep"

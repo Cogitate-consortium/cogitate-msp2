@@ -8,19 +8,19 @@
 # Re-run 08 and 09_make after template or path changes before submitting.
 # Runs inspect_2nd_level_for_3rd.py strict checks on each FSF before sbatch (same gates
 # as inspect_2nd_level_for_3rd.sh; re-run 09_make if subjects fail). Refreshes cohort
-# inspect report under gPPI_code/3rd level report/ at start.
+# inspect report under gPPI_code/dAT-seen/3rd level report/ at start.
 # Submits every analysis/cope that has a valid FSF; warns
 # and skips missing FSFs.
 # Writes submission_inclusion_report.txt (subjects per analysis/cope, from 09_make
 # included_subjects_report.txt / FSF). Writes a trace-back inclusion report under
-# gPPI_code/3rd level report/ (see make_3rd_level_inclusion_report.sh).
+# gPPI_code/dAT-seen/3rd level report/ (see make_3rd_level_inclusion_report.sh).
 # Exits 1 only on sbatch failure or if nothing was submitted.
 #
 # Usage: bash 10_run_PPI_3rd_level.sh
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 export OPENBLAS_NUM_THREADS=1
@@ -28,7 +28,7 @@ export OPENBLAS_NUM_THREADS=1
 module load FSL 2>/dev/null || true
 
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 FSF_FILES_ROOT="${GPPI_CODE_ROOT}/fsf_files/group"
 JOB_FILES_ROOT="${GPPI_CODE_ROOT}/job_files/run_PPI_3rd_level"
 SLURM_TEMPLATE="${GPPI_CODE_ROOT}/slurm_templates/PPI_3rd_lvl.sh"

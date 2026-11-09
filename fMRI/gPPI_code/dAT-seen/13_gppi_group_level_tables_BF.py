@@ -21,7 +21,7 @@ import pandas as pd
 
 CODE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(CODE_DIR))
-sys.path.insert(0, str(CODE_DIR.parent))
+sys.path.insert(0, str(CODE_DIR.parents[1]))  # fMRI/ for demo_paths
 
 from demo_paths import BIDS_ROOT as _DP_BIDS  # noqa: E402
 from roi_definitions import GNW_roi_list, IIT_roi_list, roi_list  # noqa: E402

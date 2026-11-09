@@ -5,15 +5,15 @@
 # Usage: bash run_average_gppi_in_evc.sh
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 set -euo pipefail
 
 module load FSL 2>/dev/null || true
 
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 FILTER_COL="${FILTER_COL:-SYNCHRONY_min_seen}"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 EVC_ROIS_ROOT="${BIDS_ROOT}/derivatives/evc_rois"

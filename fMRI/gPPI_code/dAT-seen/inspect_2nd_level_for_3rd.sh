@@ -2,7 +2,7 @@
 # Inspect all gPPI 2nd-level .gfeat outputs for issues that can cause all-zero 3rd-level maps.
 #
 # PPI_FFA -> cope3.feat (inner stats/cope1), PPI_LOC -> cope4.feat.
-# Writes gPPI_code/3rd level report/inspect_2nd_level_summary.csv and
+# Writes gPPI_code/dAT-seen/3rd level report/inspect_2nd_level_summary.csv and
 # inspect_2nd_level_report.txt
 #
 # Usage:
@@ -10,15 +10,15 @@
 #   bash inspect_2nd_level_for_3rd.sh --simulate-mask   # also run fslmaths mask -Tmin simulation
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 set -euo pipefail
 
 module load FSL 2>/dev/null || true
 
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 REPORT_DIR="${GPPI_CODE_ROOT}/3rd level report"
 

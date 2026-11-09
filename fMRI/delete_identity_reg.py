@@ -3,7 +3,7 @@
 Reset identity-registration artifacts for 2nd-level FEAT prep (activation, gPPI, FIR).
 
 Reverses changes from ``glm/identity_reg_for_2nd_lvl.sh`` and pipeline scripts:
-``activation/02_create_identity_reg_for_2nd_lvl.sh``, ``gPPI_code/05_...``,
+``activation/02_create_identity_reg_for_2nd_lvl.sh``, ``gPPI_code/dAT-seen/05_...``,
 ``FIR/04_create_identity_reg_for_2nd_lvl.sh``.
 
 For each selected analysis this tool can:

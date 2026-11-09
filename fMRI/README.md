@@ -297,10 +297,14 @@ bash make_3rd_level_inclusion_report.sh
 
 **Purpose:** Generalized psychophysiological interaction (gPPI) with **FFA** and **LOC** seeds; group-level maps for `PPI_FFA` (cope 3) and `PPI_LOC` (cope 4).
 
+Pipelines are organized by task condition under `gPPI_code/`. The **dAT-seen** (task-VG) pipeline lives in `gPPI_code/dAT-seen/` (below). AT-seen-go / AT-seen-no-go pipelines can be added as sibling folders later.
+
 **Extra dependencies:** Event files from §2; seed masks in `gppi_seeds/` (Experiment 1); fMRIPrep MNI BOLD; EVC ROIs from §3 (optional follow-up only). Subjects: `SYNCHRONY_min_seen == TRUE`.
 
+#### 6a. dAT-seen (`gPPI_code/dAT-seen/`)
+
 ```bash
-cd "${CODE_PATH}/gPPI_code"
+cd "${CODE_PATH}/gPPI_code/dAT-seen"
 
 # 1. Input: seen face/object EV files → Output: *_prefer_Face.txt, *_prefer_Object.txt
 bash 01_create_ev_files.sh
@@ -308,7 +312,7 @@ bash 01_create_ev_files.sh
 # 2. Input: seed masks, fMRIPrep BOLD → Output: gppi_timecourse/sub-{code}/*_timecourse_{FFA,LOC}.txt
 bash 02_make_timecourse_files.sh
 
-# 3. Input: templates, EVs, timecourses, confounds → Output: gPPI_code/fsf_files/1st_level/*.fsf
+# 3. Input: templates, EVs, timecourses, confounds → Output: dAT-seen/fsf_files/1st_level/*.fsf
 bash 03_make_fsf_files.sh
 
 # 4. Input: 1st-level FSFs → Output: fslFeat/gPPI/sub-{code}/*_analysis-1stGLM_PPI_{FFA,LOC}*.feat
@@ -317,7 +321,7 @@ bash 04_run_PPI_1st_level.sh
 # 5. Input: 1st-level PPI .feat → Output: dummy reg/ per run
 bash 05_create_identity_reg_for_2nd_lvl.sh
 
-# 6. Input: 1st-level FEAT → Output: gPPI_code/fsf_files/2nd_level/*.fsf
+# 6. Input: 1st-level FEAT → Output: dAT-seen/fsf_files/2nd_level/*.fsf
 bash 06_make_fsf_files_2ndlevel.sh
 
 # 7. Input: 2nd-level FSFs → Output: fslFeat/gPPI/sub-{code}/*_analysis-2ndGLM_PPI_*.gfeat
@@ -326,7 +330,7 @@ bash 07_run_PPI_2nd_level_VG.sh
 # 8. Input: 2nd-level .gfeat → Output: dummy reg/ at 2nd-level roots
 bash 08_create_identity_reg_for_3rd_lvl.sh
 
-# 9. Input: 2nd-level copes 3 (FFA) / 4 (LOC) → Output: gPPI_code/fsf_files/group/*.fsf
+# 9. Input: 2nd-level copes 3 (FFA) / 4 (LOC) → Output: dAT-seen/fsf_files/group/*.fsf
 bash 09_make_fsf_files_3rdlevel.sh
 
 # 10. Input: 3rd-level FSFs → Output: fslFeat/gPPI/group/*.gfeat
@@ -347,7 +351,7 @@ python3 12_gppi_group_analysis_BF.py
 #     Output: derivatives/bf/{FFA,LOC}_{bf10,bf01}_*_roi_summary.csv
 python3 13_gppi_group_level_tables_BF.py
 
-# Optional: 3rd-level inclusion report → gPPI_code/3rd level report/
+# Optional: 3rd-level inclusion report → dAT-seen/3rd level report/
 bash make_3rd_level_inclusion_report.sh
 ```
 
@@ -356,9 +360,9 @@ Steps **12–13** convert group FEAT one-sample t-maps to JZS Bayes Factors (Pin
 **Optional EVC follow-up:**
 
 ```bash
-cd "${CODE_PATH}/gPPI_code"
+cd "${CODE_PATH}/gPPI_code/dAT-seen"
 
-# QC 2nd-level maps before/at 3rd level → gPPI_code/3rd level report/inspect_*
+# QC 2nd-level maps before/at 3rd level → dAT-seen/3rd level report/inspect_*
 bash inspect_2nd_level_for_3rd.sh
 
 # Copy 2nd-level stat maps → derivatives/gppi/2nd_lvl/
@@ -544,6 +548,8 @@ fMRI/
 ├── glm/                     # Shared VG 1st-level GLM + FEAT QC
 ├── activation/              # Seen vs unseen face/object GLM
 ├── gPPI_code/               # FFA/LOC psychophysiological interaction
+│   ├── dAT-seen/            # dAT-seen (task-VG) gPPI pipeline
+│   └── gPPI_analyses_description/  # planned vs run notes (local)
 ├── FIR/                     # FIR timecourse models
 ├── decoding/                # nibetaseries decoding (see decoding/readme.md)
 ├── MNI_standard_space/      # Reference templates

@@ -7,21 +7,21 @@
 
 # Load FSL
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 module load FSL
 
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 EVC_ROIS_ROOT="${BIDS_ROOT}/derivatives/evc_rois"
 
 analysis="SYNCHRONY_min_seen"
 SUBJECT_CSV_COLUMN="${SUBJECT_CSV_COLUMN:-${analysis}}"
 
-# shellcheck source=../EVC/evc_config.sh
-source "${GPPI_CODE_ROOT}/../EVC/evc_config.sh"
+# shellcheck source=../../EVC/evc_config.sh
+source "${_CODE_ROOT}/EVC/evc_config.sh"
 
 if ! evc_load_subjects; then
     exit 1

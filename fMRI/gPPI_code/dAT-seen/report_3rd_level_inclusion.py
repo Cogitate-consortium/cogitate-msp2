@@ -21,7 +21,7 @@ import pandas as pd
 from gppi_3rd_level import ANALYSES, ANALYSIS_COPE
 import sys
 from pathlib import Path as _Path
-sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))
 from demo_paths import BIDS_ROOT as _DP_BIDS, CODE_PATH as _DP_CODE  # noqa: E402
 
 
@@ -57,10 +57,10 @@ PREFER_UPSTREAM_SUFFIXES = (
     "probedSeenObjectRight_EV.txt",
 )
 
-# Defaults match gPPI_code/make_3rd_level_inclusion_report.sh (override via env or CLI).
+# Defaults match gPPI_code/dAT-seen/make_3rd_level_inclusion_report.sh (override via env or CLI).
 DEFAULT_BIDS_ROOT = str(_DP_BIDS)
 DEFAULT_CODE_ROOT = str(_DP_CODE)
-DEFAULT_GPPI_ROOT = f"{DEFAULT_CODE_ROOT}/gPPI_code"
+DEFAULT_GPPI_ROOT = f"{DEFAULT_CODE_ROOT}/gPPI_code/dAT-seen"
 DEFAULT_TIMECOURSE_ROOT = f"{DEFAULT_BIDS_ROOT}/derivatives/gppi_timecourse"
 
 

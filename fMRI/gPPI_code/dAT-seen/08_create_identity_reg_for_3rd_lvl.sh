@@ -18,13 +18,13 @@
 # Requires FSL in PATH. Shared helpers: glm/identity_reg_for_2nd_lvl.sh
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_CODE_ROOT="$(cd "${_SCRIPT_DIR}/.." && pwd)"
-# shellcheck source=../demo_paths.sh
+_CODE_ROOT="$(cd "${_SCRIPT_DIR}/../.." && pwd)"
+# shellcheck source=../../demo_paths.sh
 source "${_CODE_ROOT}/demo_paths.sh"
 
 module load FSL
 
-GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code"
+GPPI_CODE_ROOT="${CODE_PATH}/gPPI_code/dAT-seen"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat"
 JOB_FILES_ROOT="${GPPI_CODE_ROOT}/job_files/create_identity_reg_for_3rd_lvl"
 IDENTITY_REG_LIB="${CODE_PATH}/glm/identity_reg_for_2nd_lvl.sh"

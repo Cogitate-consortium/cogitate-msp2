@@ -31,7 +31,7 @@ from gppi_evc_paths import (
     resolve_2nd_stat,
 )
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from demo_paths import BIDS_ROOT as _DP_BIDS  # noqa: E402
 
 DEFAULT_DEST = _DP_BIDS / "derivatives" / "gppi" / "2nd_lvl"
