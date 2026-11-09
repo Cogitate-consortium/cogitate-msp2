@@ -1,8 +1,8 @@
 # fMRI Experiment 2 — Analysis Pipeline
 
-Code for COGITATE fMRI Experiment 2 (ses-V2): **fMRIPrep preprocessing**, logfile processing, GLM/FEAT analyses (activation, gPPI, FIR), EVC localizer ROIs, and decoding.
+Code for COGITATE fMRI Experiment 2 (ses-V2): logfile → BIDS events, **fMRIPrep** preprocessing, GLM/FEAT analyses (activation, gPPI, FIR), EVC localizer ROIs, and decoding.
 
-Run pipelines **in the order listed under [Analysis Pipeline](#analysis-pipeline)**. Later steps depend on outputs from earlier ones. In particular, **fMRIPrep must be run** on the BIDS data before FEAT analyses (see [1. Preprocessing (fMRIPrep)](#1-preprocessing-fmriprep)).
+Run pipelines **in the order listed under [Analysis Pipeline](#analysis-pipeline)**. Later steps depend on outputs from earlier ones: create BIDS **`events.tsv`** from behavioural logs ([§1](#1-logfiles-and-checks-logfiles_and_checks)), then run **fMRIPrep** ([§2](#2-preprocessing-fmriprep)) before any FEAT analysis.
 
 ---
 
@@ -20,7 +20,7 @@ Run pipelines **in the order listed under [Analysis Pipeline](#analysis-pipeline
 | **Bash** | Pipeline wrapper scripts | Standard Linux bash |
 | **Python** | Most analysis scripts | **≥ 3.7** |
 | **FSL** | FEAT / `fslmeants` / `fslstats` / `fslmaths` | **6.x** (see tested versions) |
-| **fMRIPrep** | BOLD/anat preprocessing (required before FEAT) | **20.2.3** (see Analysis Pipeline §1) |
+| **fMRIPrep** | BOLD/anat preprocessing (required before FEAT) | **20.2.3** (see Analysis Pipeline §2) |
 | **FreeSurfer** | License for fMRIPrep; CLI tools for EVC masks (§3) | **6.x** (see Installation) |
 | **ANTs** | EVC ROI construction (§3) | **2.3.x** |
 | **Singularity** | Decoding beta-series container runtime (§8) | Required for nibetaseries jobs |
@@ -59,7 +59,7 @@ This repository is analysis code only (no compiled package). Install the externa
    git clone https://github.com/Cogitate-consortium/cogitate-msp2.git
    # sync or place the fMRI/ tree at ${BIDS_ROOT}/code (or set CODE_PATH)
    ```
-2. **fMRIPrep** (required, Analysis Pipeline §1) — [fMRIPrep documentation](https://fmriprep.org); use **20.2.3**. On HPC often `module load fmriprep/20.2.3`. Optional helper: [fmriprep_sub](https://github.com/marcelzwiers/fmriprep_sub). Container installs bundle FreeSurfer; you still need a free [FreeSurfer license](https://surfer.nmr.mgh.harvard.edu/registration.html) (`--fs-license-file` / `$FS_LICENSE`). Bare-metal fMRIPrep requires FreeSurfer on `$PATH` (see [fMRIPrep installation](https://fmriprep.org/en/stable/installation.html)).
+2. **fMRIPrep** (required, Analysis Pipeline §2) — [fMRIPrep documentation](https://fmriprep.org); use **20.2.3**. On HPC often `module load fmriprep/20.2.3`. Optional helper: [fmriprep_sub](https://github.com/marcelzwiers/fmriprep_sub). Container installs bundle FreeSurfer; you still need a free [FreeSurfer license](https://surfer.nmr.mgh.harvard.edu/registration.html) (`--fs-license-file` / `$FS_LICENSE`). Bare-metal fMRIPrep requires FreeSurfer on `$PATH` (see [fMRIPrep installation](https://fmriprep.org/en/stable/installation.html)).
 3. **FSL** — follow [FSL installation](https://fsl.fmrib.ox.ac.uk/fsl/docs/#/install/index); then e.g. `module load FSL` on HPC.
 4. **FreeSurfer** (EVC §3 only, after fMRIPrep) — `recon-all` and subject surfaces are produced under `{BIDS_ROOT}/derivatives/freesurfer` by fMRIPrep; you do **not** re-run FreeSurfer reconstruction for that. EVC mask scripts still call FreeSurfer binaries (e.g. `mri_label2vol`), so install or `module load` FreeSurfer **6.x** on the host for those steps: [Download and install](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall).
 5. **ANTs** (EVC only) — [ANTsX/ANTs](https://github.com/ANTsX/ANTs).
@@ -113,8 +113,8 @@ See **Sample data and demo** below.
 
 | Location                                       | Contents                                              |
 | ---------------------------------------------- | ----------------------------------------------------- |
-| `{BIDS_ROOT}/derivatives/fmriprep/`            | Preprocessed BOLD/anat (Analysis Pipeline §1)         |
-| `{BIDS_ROOT}/derivatives/freesurfer/`          | FreeSurfer reconstructions from fMRIPrep (§1)         |
+| `{BIDS_ROOT}/derivatives/fmriprep/`            | Preprocessed BOLD/anat (Analysis Pipeline §2)         |
+| `{BIDS_ROOT}/derivatives/freesurfer/`          | FreeSurfer reconstructions from fMRIPrep (§2)         |
 | `{BIDS_ROOT}/derivatives/regressoreventfiles/` | FSL 3-column event files and confounds                |
 | `{BIDS_ROOT}/derivatives/fslFeat/`             | FEAT outputs (`activation/`, `gPPI/`, `FIR/`, `EVC/`) |
 | `{BIDS_ROOT}/derivatives/bf/`                  | gPPI group Bayes Factor maps and ROI summary CSVs     |
@@ -146,35 +146,19 @@ Aggregates 3rd-level inclusion/failure reports for activation, FIR, and gPPI.
 
 ## Analysis Pipeline
 
-### 1. Preprocessing (fMRIPrep)
+### 1. Logfiles and checks (`logfiles_and_checks/`)
 
-**fMRIPrep is a required step of this pipeline** (full dataset and demo). All FEAT analyses (EVC, activation, gPPI, FIR) and decoding assume preprocessed BOLD (and FreeSurfer derivatives) under `{BIDS_ROOT}/derivatives/fmriprep` and `{BIDS_ROOT}/derivatives/freesurfer`.
+**Purpose:** From raw Exp 2 behavioural logs, write BIDS **`events.tsv`** sidecars and FSL 3-column event files; run log QC.
 
-Run fMRIPrep on your BIDS root after BIDS conversion (and after creating `events.tsv` if you start from raw logs). Example using [fmriprep_sub](https://github.com/marcelzwiers/fmriprep_sub) / fMRIPrep **20.2.3** (same settings as COGITATE MSP1):
+Do this **before fMRIPrep (§2)** when you start from raw logs, so the BIDS tree includes trial timing for later GLM / decoding. (fMRIPrep itself does not require `events.tsv` to preprocess BOLD, but later pipeline steps do.)
 
-```bash
-module purge
-module load fmriprep/20.2.3
-cd /path/to/parent_of_bids   # directory that contains your BIDS root
-fmriprep_sub.py /path/to/bids -w ./scratch/fmriprep_workdir --time 80 --mem_mb 30000 -n 6 \
-  -a " --ignore sbref slicetiming --output-spaces T1w MNI152NLin2009cAsym"
-```
-
-See also [fMRIPrep documentation](https://fmriprep.org). Typical runtime is on the order of **~1–2 days per subject** (subjects can run in parallel). FreeSurfer reconstructions used by EVC are produced as part of the fMRIPrep anatomical workflow.
-
----
-
-### 2. Logfiles and checks (`logfiles_and_checks/`)
-
-**Purpose:** Extract BIDS event TSVs and FSL event files from behavioural logs; run log QC.
-
-**Extra dependencies:** Raw Exp 2 log files under `RAW_DIR`; subject list in `ses-v2-analysis-subs-fmri.csv`.
+**Extra dependencies:** Raw Exp 2 log files under `RAW_DIR`; subject list in `ses-v2-analysis-subs-fmri.csv`. After imaging is BIDS-converted, set `BIDS_ROOT` / `RAW_DIR` (or use `demo_paths` defaults).
 
 ```bash
 cd "${CODE_PATH}/logfiles_and_checks"
 
 # All subjects (SLURM): input = raw logs, SUBJECT_CSV
-# Output = BIDS events, regressoreventfiles/*_EV.txt, logfilechecks QC CSVs
+# Output = BIDS events.tsv, regressoreventfiles/*_EV.txt, logfilechecks QC CSVs
 bash 01_submit_01_exp2_fMRI_logfile_extraction_and_checks.sh
 
 # Single subject
@@ -189,7 +173,23 @@ python3 exp2_fMRI_logfile_extraction_and_checks.py --sub-code SC108
 
 ---
 
+### 2. Preprocessing (fMRIPrep)
 
+**fMRIPrep is a required step of this pipeline** (full dataset and demo). All FEAT analyses (EVC, activation, gPPI, FIR) and decoding assume preprocessed BOLD (and FreeSurfer derivatives) under `{BIDS_ROOT}/derivatives/fmriprep` and `{BIDS_ROOT}/derivatives/freesurfer`.
+
+Run fMRIPrep on your BIDS root **after BIDS conversion** of imaging data. Prefer running **§1 first** so `events.tsv` already sit next to the BOLD files. Example using [fmriprep_sub](https://github.com/marcelzwiers/fmriprep_sub) / fMRIPrep **20.2.3** (same settings as COGITATE MSP1):
+
+```bash
+module purge
+module load fmriprep/20.2.3
+cd /path/to/parent_of_bids   # directory that contains your BIDS root
+fmriprep_sub.py /path/to/bids -w ./scratch/fmriprep_workdir --time 80 --mem_mb 30000 -n 6 \
+  -a " --ignore sbref slicetiming --output-spaces T1w MNI152NLin2009cAsym"
+```
+
+See also [fMRIPrep documentation](https://fmriprep.org). Typical runtime is on the order of **~1–2 days per subject** (subjects can run in parallel). FreeSurfer reconstructions used by EVC are produced as part of the fMRIPrep anatomical workflow.
+
+---
 
 ### 3. EVC localizer (`EVC/`)
 
@@ -231,7 +231,7 @@ bash 07_review_EVC.sh
 
 **Purpose:** Run session-V2 VG **1st-level GLM** FEAT (MNI space, registration off). These runs feed the **activation** 2nd-level pipeline.
 
-**Extra dependencies:** Event files from §2; fMRIPrep preprocessed BOLD.
+**Extra dependencies:** Event files from §1; fMRIPrep preprocessed BOLD (§2).
 
 ```bash
 cd "${CODE_PATH}/glm"
@@ -299,7 +299,7 @@ bash make_3rd_level_inclusion_report.sh
 
 Pipelines are organized by task condition under `gPPI_code/`: **dAT-seen** (task-VG), **AT-seen-go** (task-Replay Hits), **AT-seen-no-go** (task-Replay Correctrejects), plus a cross-condition **conjunction** (§6d).
 
-**Extra dependencies:** Event files from §2; seed masks in `gppi_seeds/` (Experiment 1); fMRIPrep MNI BOLD; EVC ROIs from §3 (optional follow-up only). Subjects: `SYNCHRONY_min_seen == TRUE`.
+**Extra dependencies:** Event files from §1; seed masks in `gppi_seeds/` (Experiment 1); fMRIPrep MNI BOLD (§2); EVC ROIs from §3 (optional follow-up only). Subjects: `SYNCHRONY_min_seen == TRUE`.
 
 #### 6a. dAT-seen (`gPPI_code/dAT-seen/`)
 
@@ -443,7 +443,7 @@ bash run_gPPI_conjunction.sh
 
 **Purpose:** Finite impulse response (FIR) models for seen vs unseen probes; 2nd/3rd-level FEAT and ROI averaging in FFA/LOC.
 
-**Extra dependencies:** Event files from §2; FFA/LOC seed masks (`gppi_seeds/`). Subjects: `BASELINE_min_seen_unseen == TRUE`.
+**Extra dependencies:** Event files from §1; FFA/LOC seed masks (`gppi_seeds/`). Subjects: `BASELINE_min_seen_unseen == TRUE`.
 
 ```bash
 cd "${CODE_PATH}/FIR"
@@ -495,7 +495,7 @@ bash make_fir_3rd_level_inclusion_report.sh
 
 **Purpose:** Trial-level beta-series extraction (nibetaseries), ROI and searchlight decoding, group inference, RSA, and plotting.
 
-**Extra dependencies:** fMRIPrep derivatives; nibetaseries (≥ 0.6), Nilearn, MNE-Python, scikit-learn, Singularity; BIDS events from §2; ROI definitions.
+**Extra dependencies:** fMRIPrep derivatives (§2); nibetaseries (≥ 0.6), Nilearn, MNE-Python, scikit-learn, Singularity; BIDS events from §1; ROI definitions.
 
 ```bash
 cd "${CODE_PATH}/decoding"
@@ -558,7 +558,7 @@ This sets `DEMO=1`, `BIDS_ROOT` → `./data_demo`, `CODE_PATH` → this `fMRI/` 
 
 ### 3. Preprocessing (fMRIPrep)
 
-The demo pack is BIDS-converted raw data. **fMRIPrep is required for the full pipeline as well as the demo** — see [1. Preprocessing (fMRIPrep)](#1-preprocessing-fmriprep) in the Analysis Pipeline. Point the same command at `${BIDS_ROOT}` (after `source demo_setup.sh`):
+The demo pack is BIDS-converted raw data (including `events.tsv`). **fMRIPrep is required for the full pipeline as well as the demo** — see [2. Preprocessing (fMRIPrep)](#2-preprocessing-fmriprep) in the Analysis Pipeline. Point the same command at `${BIDS_ROOT}` (after `source demo_setup.sh`):
 
 ```bash
 module purge
@@ -574,9 +574,9 @@ Then refresh demo session aliases for the new derivatives:
 source demo_setup.sh   # refresh ses-V2 aliases for fmriprep/freesurfer outputs
 ```
 
-### 4. Event files and confounds (skip RAW logfile extraction)
+### 4. Event files and confounds (skip Analysis Pipeline §1)
 
-Demo `events.tsv` files are already present. Do **not** require `RAW_DIR` behavioural logs for the demo:
+Demo `events.tsv` files are already present, so you can **skip** raw-log extraction (§1). Do **not** require `RAW_DIR` behavioural logs for the demo:
 
 ```bash
 python3 demo_make_ev_from_bids.py
