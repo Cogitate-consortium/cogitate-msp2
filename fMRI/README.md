@@ -297,7 +297,7 @@ bash make_3rd_level_inclusion_report.sh
 
 **Purpose:** Generalized psychophysiological interaction (gPPI) with **FFA** and **LOC** seeds; group-level maps for `PPI_FFA` (cope 3) and `PPI_LOC` (cope 4).
 
-Pipelines are organized by task condition under `gPPI_code/`: **dAT-seen** (task-VG), **AT-seen-go** (task-Replay Hits), and **AT-seen-no-go** (task-Replay Correctrejects).
+Pipelines are organized by task condition under `gPPI_code/`: **dAT-seen** (task-VG), **AT-seen-go** (task-Replay Hits), **AT-seen-no-go** (task-Replay Correctrejects), plus a cross-condition **conjunction** (§6d).
 
 **Extra dependencies:** Event files from §2; seed masks in `gppi_seeds/` (Experiment 1); fMRIPrep MNI BOLD; EVC ROIs from §3 (optional follow-up only). Subjects: `SYNCHRONY_min_seen == TRUE`.
 
@@ -419,6 +419,20 @@ python3 13_gppi_group_level_tables_BF.py
 bash make_3rd_level_inclusion_report.sh
 bash inspect_2nd_level_for_3rd.sh
 bash run_copy_gppi_2nd_lvl_for_evc.sh
+```
+
+#### 6d. Conjunction (`gPPI_code/gPPI_conjunction_analysis/`)
+
+**Descriptive conjunction** of cluster-thresholded group PPI maps across **dAT-seen ∩ AT-seen-go ∩ AT-seen-no-go** (prereg: similar regions across all three seen conditions; FFA and LOC seeds separately). Inputs are each pipeline’s 3rd-level `thresh_zstat1.nii.gz` (GRF: forming z ≥ 3.1, cluster *p* < 0.05).
+
+```bash
+cd "${CODE_PATH}/gPPI_code/gPPI_conjunction_analysis"
+
+# After 3rd-level FEAT for all three conditions:
+bash run_gPPI_conjunction.sh
+# → derivatives/gppi/conjunction/gppi_conjunction_{FFA,LOC}_dAT-seen_AT-seen-go_AT-seen-no-go.nii.gz
+# → derivatives/gppi/conjunction/gppi_conjunction_{FFA,LOC}_overlap_count.nii.gz
+# → derivatives/gppi/conjunction/gppi_conjunction_{FFA,LOC}_summary.csv
 ```
 
 ---
@@ -603,6 +617,7 @@ fMRI/
 │   ├── dAT-seen/            # dAT-seen (task-VG) gPPI pipeline
 │   ├── AT-seen-go/          # AT-seen-go (task-Replay Hits) gPPI pipeline
 │   ├── AT-seen-no-go/       # AT-seen-no-go (task-Replay Correctreject) gPPI
+│   ├── gPPI_conjunction_analysis/  # descriptive 3-condition conjunction
 │   └── gPPI_analyses_description/  # planned vs run notes (local)
 ├── FIR/                     # FIR timecourse models
 ├── decoding/                # nibetaseries decoding (see decoding/readme.md)
