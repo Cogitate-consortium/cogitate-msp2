@@ -336,7 +336,7 @@ bash 09_make_fsf_files_3rdlevel.sh
 # 10. Input: 3rd-level FSFs → Output: fslFeat/gPPI/group/*.gfeat
 bash 10_run_PPI_3rd_level.sh
 
-# 11. ROI means in V1/V2 → derivatives/gppi/gppi_evc_roi_means_*.csv
+# 11. ROI means in V1/V2 → derivatives/gppi/gppi_dAT-seen_evc_roi_means_*.csv
 bash run_average_gppi_in_evc.sh
 
 # 12. Voxel-wise Bayes Factor maps from 3rd-level gPPI t-stats
@@ -386,7 +386,7 @@ bash 07_run_PPI_2nd_level_Replay.sh
 bash 08_create_identity_reg_for_3rd_lvl.sh
 bash 09_make_fsf_files_3rdlevel.sh
 bash 10_run_PPI_3rd_level.sh
-bash run_average_gppi_in_evc.sh     # → derivatives/gppi/AT-seen-go/
+bash run_average_gppi_in_evc.sh     # → derivatives/gppi/gppi_AT-seen-go_evc_*
 python3 12_gppi_group_analysis_BF.py   # → derivatives/bf/AT-seen-go/
 python3 13_gppi_group_level_tables_BF.py
 
@@ -412,7 +412,7 @@ bash 07_run_PPI_2nd_level_Replay.sh
 bash 08_create_identity_reg_for_3rd_lvl.sh
 bash 09_make_fsf_files_3rdlevel.sh
 bash 10_run_PPI_3rd_level.sh
-bash run_average_gppi_in_evc.sh     # → derivatives/gppi/AT-seen-no-go/
+bash run_average_gppi_in_evc.sh     # → derivatives/gppi/gppi_AT-seen-no-go_evc_*
 python3 12_gppi_group_analysis_BF.py   # → derivatives/bf/AT-seen-no-go/
 python3 13_gppi_group_level_tables_BF.py
 

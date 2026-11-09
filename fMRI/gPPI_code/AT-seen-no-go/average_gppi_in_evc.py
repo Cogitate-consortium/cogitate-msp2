@@ -6,9 +6,9 @@ Writes one CSV from inner stats/cope1 and one from stats/zstat1 per subject.
 Prefer .gfeat over .feat (consistent with 09_make / inspect_2nd_level_for_3rd).
 
 Outputs (default under derivatives/gppi/):
-  - gppi_evc_roi_means_cope_{filter_col}.csv
-  - gppi_evc_roi_means_zstat_{filter_col}.csv
-  - gppi_evc_averaging_inclusion_report.txt
+  - gppi_AT-seen-no-go_evc_roi_means_cope_{filter_col}.csv
+  - gppi_AT-seen-no-go_evc_roi_means_zstat_{filter_col}.csv
+  - gppi_AT-seen-no-go_evc_averaging_inclusion_report.txt
 """
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ from gppi_evc_paths import (
 )
 from gppi_3rd_level import ANALYSIS_COPE
 
+ANALYSIS_NAME = "AT-seen-no-go"
 EVC_MASK_SUFFIX = "_evc_300_V1V2.nii.gz"
 
 STAT_SPECS: tuple[tuple[str, str, tuple[str, str]], ...] = (
@@ -283,14 +284,14 @@ def main() -> int:
             col_loc=col_loc,
         )
         runs.append(run)
-        out_csv = out_dir / f"gppi_evc_roi_means_{label}_{args.filter_col}.csv"
+        out_csv = out_dir / f"gppi_{ANALYSIS_NAME}_evc_roi_means_{label}_{args.filter_col}.csv"
         write_csv(out_csv, run)
         print(
             f">> {label}: wrote {len(run.included)} rows to {out_csv} "
             f"(excluded {len(run.excluded)})"
         )
 
-    report_path = out_dir / "gppi_evc_averaging_inclusion_report.txt"
+    report_path = out_dir / f"gppi_{ANALYSIS_NAME}_evc_averaging_inclusion_report.txt"
     write_inclusion_report(
         report_path,
         filter_col=args.filter_col,

@@ -50,13 +50,14 @@ gppi_2nd_stat() {
     return 1
 }
 
-out_dir="${BIDS_ROOT}/derivatives/gppi/AT-seen-no-go/"
+ANALYSIS_NAME="AT-seen-no-go"
+out_dir="${BIDS_ROOT}/derivatives/gppi/"
 mkdir -p "$out_dir"
 
 write_evc_table() {
     local stat_name="$1"
     local stat_label="$2"
-    local out_csv="${out_dir}/gppi_evc_roi_means_${stat_label}_${analysis}.csv"
+    local out_csv="${out_dir}/gppi_${ANALYSIS_NAME}_evc_roi_means_${stat_label}_${analysis}.csv"
     local n_written=0
     local n_skipped=0
 
