@@ -1,282 +1,298 @@
 #!/usr/bin/env bash
 # Compare new vs old gPPI seed masks (FFA/LOC NIfTI) per subject.
 #
-# Overlap is the smaller of
-#   100 * |new ∩ old| / |new|
-#   100 * |new ∩ old| / |old|
-# (binary voxels).
+# Overlap = min(100*|intersect|/|new|, 100*|intersect|/|old|) on binary voxels.
+# Writes ALL pairs (overlap descending) to low_overlap.txt and all_overlap.txt.
 #
-# Writes:
-#   all_overlap.txt   every pair, overlap descending (NA / missing last)
-#   low_overlap.txt   pairs with overlap < THRESH, same order
-#
-# Needs FSL (fslmaths, fslstats). On Wish:  module load fsl/6.0.7.23
+# Uses Python/nibabel (no FSL). Run inside cogitate_fmri:
+#   python3 -u compare_old_vs_new.sh
+#   bash compare_old_vs_new.sh
 
 set -euo pipefail
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-NEW_ROOT="${NEW_ROOT:-/wishData/cogitate-data/fMRI/bids/derivatives/exclude/new/gppi_seeds}"
-OLD_ROOT="${OLD_ROOT:-/wishData/cogitate-data/fMRI/bids/derivatives/exclude/old/gppi_seeds}"
-ALL_OUT="${ALL_OUT:-${_SCRIPT_DIR}/all_overlap.txt}"
-LOW_OUT="${LOW_OUT:-${_SCRIPT_DIR}/low_overlap.txt}"
-THRESH="${THRESH:-95}"
+export NEW_ROOT="${NEW_ROOT:-/wishData/cogitate-data/fMRI/bids/derivatives/exclude/new/gppi_seeds}"
+export OLD_ROOT="${OLD_ROOT:-/wishData/cogitate-data/fMRI/bids/derivatives/exclude/old/gppi_seeds}"
+export ALL_OUT="${ALL_OUT:-${_SCRIPT_DIR}/all_overlap.txt}"
+export LOW_OUT="${LOW_OUT:-${_SCRIPT_DIR}/low_overlap.txt}"
+export THRESH="${THRESH:-95}"
+export PYTHONUNBUFFERED=1
 
-if ! command -v fslmaths >/dev/null 2>&1 || ! command -v fslstats >/dev/null 2>&1; then
-    echo "ERROR: fslmaths/fslstats not in PATH. Load FSL (e.g. module load fsl/6.0.7.23)." >&2
-    exit 1
-fi
+exec python3 -u - <<'PY'
+from __future__ import annotations
 
-if [ ! -d "$NEW_ROOT" ]; then
-    echo "ERROR: new seeds root not found: $NEW_ROOT" >&2
-    exit 1
-fi
-if [ ! -d "$OLD_ROOT" ]; then
-    echo "ERROR: old seeds root not found: $OLD_ROOT" >&2
-    exit 1
-fi
+import os
+import re
+import sys
+from pathlib import Path
 
-_TMP="$(mktemp -d "${TMPDIR:-/tmp}/gppi_seed_overlap.XXXXXX")"
-trap 'rm -rf "$_TMP"' EXIT
-ROWS="${_TMP}/rows.tsv"
+import numpy as np
 
-stem_of() {
-    local f="$1"
-    local b
-    b="$(basename "$f")"
-    b="${b%.nii.gz}"
-    b="${b%.nii}"
-    printf '%s' "$b"
-}
+try:
+    import nibabel as nib
+except ImportError:
+    sys.exit("ERROR: nibabel not found. Activate cogitate_fmri (or pip install nibabel).")
 
-nifti_list() {
-    find "$1" -type f \( -name '*.nii.gz' -o -name '*.nii' \) ! -name '*timecourse*' | sort
-}
+NEW_ROOT = Path(os.environ["NEW_ROOT"])
+OLD_ROOT = Path(os.environ["OLD_ROOT"])
+ALL_OUT = Path(os.environ["ALL_OUT"])
+LOW_OUT = Path(os.environ["LOW_OUT"])
+THRESH = float(os.environ["THRESH"])
 
-# Unique sub-* ids from directory names and from NIfTI basenames.
-list_subjects() {
-    local root="$1"
-    local d f base
-    while IFS= read -r d; do
-        [ -n "$d" ] || continue
-        basename "$d"
-    done < <(find "$root" -type d -name 'sub-*' | sort)
-    while IFS= read -r f; do
-        [ -n "$f" ] || continue
-        base="$(basename "$f")"
-        if [[ "$base" =~ ^(sub-[A-Za-z0-9]+) ]]; then
-            printf '%s\n' "${BASH_REMATCH[1]}"
-        fi
-    done < <(nifti_list "$root")
-}
+SUB_RE = re.compile(r"(sub-[A-Za-z0-9]+)")
 
-# Prefer .nii.gz when both uncompressed and gzipped copies exist.
-list_masks() {
-    local root="$1"
-    local sub="$2"
-    local seen_gz="" f stem
-    local files="${_TMP}/masks_${sub}.txt"
-    : >"$files"
-    nifti_list "$root" | while IFS= read -r f; do
-        [ -n "$f" ] || continue
-        base="$(basename "$f")"
-        case "$base" in
-            "${sub}"_*) printf '%s\n' "$f" ;;
-            *)
-                case "$f" in
-                    */"${sub}"/*) printf '%s\n' "$f" ;;
-                esac
-                ;;
-        esac
-    done | sort -u >"$files"
 
-    while IFS= read -r f; do
-        [ -n "$f" ] || continue
-        case "$f" in
-            *.nii.gz) seen_gz="${seen_gz}$(stem_of "$f")"$'\n' ;;
-        esac
-    done <"$files"
+def log(msg: str) -> None:
+    print(msg, flush=True)
 
-    while IFS= read -r f; do
-        [ -n "$f" ] || continue
-        stem="$(stem_of "$f")"
-        if [[ "$f" == *.nii && "$f" != *.nii.gz ]]; then
-            if printf '%s' "$seen_gz" | grep -Fxq "$stem"; then
-                continue
-            fi
-        fi
-        printf '%s\n' "$f"
-    done <"$files"
-}
 
-find_old_mask() {
-    local stem="$1"
-    local hits gz
-    hits="$(find "$OLD_ROOT" -type f \( -name "${stem}.nii.gz" -o -name "${stem}.nii" \) | sort || true)"
-    if [ -z "$hits" ]; then
+def stem_of(path: Path) -> str:
+    name = path.name
+    if name.endswith(".nii.gz"):
+        return name[: -len(".nii.gz")]
+    if name.endswith(".nii"):
+        return name[: -len(".nii")]
+    return name
+
+
+def is_nifti(path: Path) -> bool:
+    if not path.is_file():
+        return False
+    name = path.name
+    if "timecourse" in name:
+        return False
+    return name.endswith(".nii.gz") or name.endswith(".nii")
+
+
+def iter_niftis(root: Path) -> list[Path]:
+    found: list[Path] = []
+    if not root.is_dir():
+        return found
+    for dirpath, _dirnames, filenames in os.walk(root, followlinks=True):
+        for fn in filenames:
+            p = Path(dirpath) / fn
+            if is_nifti(p):
+                found.append(p)
+    found.sort()
+    return found
+
+
+def prefer_gz(paths: list[Path]) -> Path:
+    for p in paths:
+        if p.name.endswith(".nii.gz"):
+            return p
+    return paths[0]
+
+
+def index_by_stem(root: Path) -> dict[str, Path]:
+    buckets: dict[str, list[Path]] = {}
+    for p in iter_niftis(root):
+        buckets.setdefault(stem_of(p), []).append(p)
+    return {stem: prefer_gz(ps) for stem, ps in buckets.items()}
+
+
+def mask_label(stem: str) -> str:
+    if "FFA" in stem:
+        return "FFA"
+    if "LOC" in stem:
+        return "LOC"
+    return stem
+
+
+def load_binary(path: Path) -> tuple[np.ndarray, tuple[int, ...]]:
+    img = nib.load(str(path))
+    data = np.asanyarray(img.dataobj)
+    return data != 0, tuple(int(x) for x in data.shape)
+
+
+def tsv_line(fields: list[str]) -> str:
+    return "\t".join(fields) + "\n"
+
+
+HEADER = [
+    "sub",
+    "mask",
+    "overlap_pct",
+    "dice_pct",
+    "n_new",
+    "n_old",
+    "n_intersect",
+    "reason",
+    "new_path",
+    "old_path",
+]
+
+
+def main() -> int:
+    if not NEW_ROOT.is_dir():
+        log(f"ERROR: NEW_ROOT not found: {NEW_ROOT}")
         return 1
-    fi
-    gz="$(printf '%s\n' "$hits" | grep '\.nii\.gz$' | head -n 1 || true)"
-    if [ -n "$gz" ]; then
-        printf '%s' "$gz"
-    else
-        printf '%s' "$(printf '%s\n' "$hits" | head -n 1)"
-    fi
-}
+    if not OLD_ROOT.is_dir():
+        log(f"ERROR: OLD_ROOT not found: {OLD_ROOT}")
+        return 1
 
-fsl_nvox() {
-    fslstats "$1" -V | awk '{printf "%d", $1+0}'
-}
+    new_index = index_by_stem(NEW_ROOT)
+    old_index = index_by_stem(OLD_ROOT)
+    log(f">> new: {NEW_ROOT}")
+    log(f">> old: {OLD_ROOT}")
+    log(f">> unique mask stems: new={len(new_index)}  old={len(old_index)}")
 
-fsl_dims() {
-    fslval "$1" dim1; printf ' '
-    fslval "$1" dim2; printf ' '
-    fslval "$1" dim3
-}
-
-# sort_key <tab> sub mask overlap dice n_new n_old n_int reason new_path old_path
-record_row() {
-    local sort_key="$1"
-    shift
-    local IFS=$'\t'
-    printf '%s\t%s\n' "$sort_key" "$*" >>"$ROWS"
-}
-
-n_new_nii="$(nifti_list "$NEW_ROOT" | wc -l | tr -d ' ')"
-n_old_nii="$(nifti_list "$OLD_ROOT" | wc -l | tr -d ' ')"
-
-echo ">> new: $NEW_ROOT"
-echo ">> old: $OLD_ROOT"
-echo ">> NIfTI files: new=${n_new_nii}  old=${n_old_nii}"
-echo ">> listing NEW_ROOT:"
-ls -la "$NEW_ROOT" | head -n 30
-if [ "$n_new_nii" -eq 0 ]; then
-    echo "ERROR: no .nii/.nii.gz masks under NEW_ROOT" >&2
-    exit 1
-fi
-
-mapfile -t SUBJECTS < <(list_subjects "$NEW_ROOT" | sort -u)
-n_subs=${#SUBJECTS[@]}
-echo ">> subjects found: ${n_subs}"
-printf '   %s\n' "${SUBJECTS[@]}"
-echo
-
-if [ "$n_subs" -eq 0 ]; then
-    echo "ERROR: no sub-* ids under $NEW_ROOT" >&2
-    exit 1
-fi
-
-: >"$ROWS"
-n_pairs=0
-n_ok=0
-n_low=0
-n_missing=0
-n_grid=0
-n_nomask=0
-
-for sub in "${SUBJECTS[@]}"; do
-    echo ">> ${sub}"
-    mapfile -t new_masks < <(list_masks "$NEW_ROOT" "$sub")
-    if [ ${#new_masks[@]} -eq 0 ]; then
-        echo "   WARN: no NIfTI masks for ${sub}" >&2
-        record_row "-1" "$sub" "ALL" "NA" "NA" "NA" "NA" "NA" "NO_NEW_MASKS" "" ""
-        n_nomask=$((n_nomask + 1))
-        continue
-    fi
-    echo "   masks: ${#new_masks[@]}"
-
-    for new_nii in "${new_masks[@]}"; do
-        n_pairs=$((n_pairs + 1))
-        stem="$(stem_of "$new_nii")"
-        mask_label="$stem"
-        case "$stem" in
-            *FFA*) mask_label="FFA" ;;
-            *LOC*) mask_label="LOC" ;;
-        esac
-
-        old_nii=""
-        if ! old_nii="$(find_old_mask "$stem")"; then
-            echo "   ${mask_label}  MISSING_OLD  $(basename "$new_nii")"
-            record_row "-1" "$sub" "$mask_label" "NA" "NA" "NA" "NA" "NA" "MISSING_OLD" "$new_nii" ""
-            n_missing=$((n_missing + 1))
+    by_sub: dict[str, list[tuple[str, Path]]] = {}
+    for stem, path in sorted(new_index.items()):
+        m = SUB_RE.search(path.name)
+        if not m:
+            log(f"WARN: skip (no sub-* in name): {path}")
             continue
-        fi
+        by_sub.setdefault(m.group(1), []).append((stem, path))
 
-        new_dims="$(fsl_dims "$new_nii" | tr -d '\n' | tr -s ' ')"
-        old_dims="$(fsl_dims "$old_nii" | tr -d '\n' | tr -s ' ')"
-        if [ "$new_dims" != "$old_dims" ]; then
-            echo "   ${mask_label}  GRID_MISMATCH  ${new_dims} vs ${old_dims}"
-            record_row "-1" "$sub" "$mask_label" "NA" "NA" "NA" "NA" "NA" "GRID_MISMATCH ${new_dims} vs ${old_dims}" "$new_nii" "$old_nii"
-            n_grid=$((n_grid + 1))
-            continue
-        fi
+    subjects = sorted(by_sub)
+    log(f">> subjects found: {len(subjects)}")
+    if not subjects:
+        log("ERROR: no sub-* NIfTI masks under NEW_ROOT")
+        return 1
 
-        bin_new="${_TMP}/new_bin.nii.gz"
-        bin_old="${_TMP}/old_bin.nii.gz"
-        bin_ov="${_TMP}/overlap.nii.gz"
+    rows: list[dict[str, str]] = []
+    n_ok = n_low = n_missing = n_grid = n_fail = 0
 
-        fslmaths "$new_nii" -bin "$bin_new"
-        fslmaths "$old_nii" -bin "$bin_old"
-        fslmaths "$bin_new" -mul "$bin_old" "$bin_ov"
+    for i_sub, sub in enumerate(subjects, start=1):
+        pairs = by_sub[sub]
+        log(f">> [{i_sub}/{len(subjects)}] {sub}  masks={len(pairs)}")
+        for stem, new_path in pairs:
+            label = mask_label(stem)
+            old_path = old_index.get(stem)
+            if old_path is None:
+                log(f"   {label}  MISSING_OLD  {new_path.name}")
+                rows.append(
+                    {
+                        "sort": -1.0,
+                        "sub": sub,
+                        "mask": label,
+                        "overlap_pct": "NA",
+                        "dice_pct": "NA",
+                        "n_new": "NA",
+                        "n_old": "NA",
+                        "n_intersect": "NA",
+                        "reason": "MISSING_OLD",
+                        "new_path": str(new_path),
+                        "old_path": "",
+                    }
+                )
+                n_missing += 1
+                continue
 
-        n_new="$(fsl_nvox "$bin_new")"
-        n_old="$(fsl_nvox "$bin_old")"
-        n_int="$(fsl_nvox "$bin_ov")"
+            log(f"   {label}  loading {new_path.name}")
+            try:
+                new_bin, new_shape = load_binary(new_path)
+                old_bin, old_shape = load_binary(old_path)
+            except Exception as exc:
+                log(f"   {label}  LOAD_FAILED  {exc}")
+                rows.append(
+                    {
+                        "sort": -1.0,
+                        "sub": sub,
+                        "mask": label,
+                        "overlap_pct": "NA",
+                        "dice_pct": "NA",
+                        "n_new": "NA",
+                        "n_old": "NA",
+                        "n_intersect": "NA",
+                        "reason": f"LOAD_FAILED {exc}",
+                        "new_path": str(new_path),
+                        "old_path": str(old_path),
+                    }
+                )
+                n_fail += 1
+                continue
 
-        read -r overlap_pct dice_pct < <(awk -v a="$n_new" -v b="$n_old" -v i="$n_int" 'BEGIN{
-            pct_a = (a>0) ? 100.0*i/a : 0
-            pct_b = (b>0) ? 100.0*i/b : 0
-            ov = (pct_a < pct_b) ? pct_a : pct_b
-            dice = (a+b>0) ? 200.0*i/(a+b) : 0
-            printf "%.2f %.2f", ov, dice
-        }')
+            if new_shape != old_shape:
+                log(f"   {label}  GRID_MISMATCH  {new_shape} vs {old_shape}")
+                rows.append(
+                    {
+                        "sort": -1.0,
+                        "sub": sub,
+                        "mask": label,
+                        "overlap_pct": "NA",
+                        "dice_pct": "NA",
+                        "n_new": "NA",
+                        "n_old": "NA",
+                        "n_intersect": "NA",
+                        "reason": f"GRID_MISMATCH {new_shape} vs {old_shape}",
+                        "new_path": str(new_path),
+                        "old_path": str(old_path),
+                    }
+                )
+                n_grid += 1
+                continue
 
-        below="$(awk -v p="$overlap_pct" -v t="$THRESH" 'BEGIN{print (p+0 < t+0) ? 1 : 0}')"
-        if [ "$below" -eq 1 ]; then
-            status="LOW_OVERLAP"
-            n_low=$((n_low + 1))
-        else
-            status="OK"
-            n_ok=$((n_ok + 1))
-        fi
-        echo "   ${mask_label}  ${overlap_pct}%  dice=${dice_pct}  n=${n_new}/${n_old}/${n_int}  ${status}"
-        record_row "$overlap_pct" "$sub" "$mask_label" "$overlap_pct" "$dice_pct" "$n_new" "$n_old" "$n_int" "$status" "$new_nii" "$old_nii"
-    done
-done
+            n_new = int(new_bin.sum())
+            n_old = int(old_bin.sum())
+            n_int = int(np.logical_and(new_bin, old_bin).sum())
+            pct_new = (100.0 * n_int / n_new) if n_new else 0.0
+            pct_old = (100.0 * n_int / n_old) if n_old else 0.0
+            overlap = min(pct_new, pct_old)
+            dice = (200.0 * n_int / (n_new + n_old)) if (n_new + n_old) else 0.0
+            reason = "LOW_OVERLAP" if overlap < THRESH else "OK"
+            if reason == "LOW_OVERLAP":
+                n_low += 1
+            else:
+                n_ok += 1
+            log(
+                f"   {label}  {overlap:.2f}%  dice={dice:.2f}  "
+                f"n={n_new}/{n_old}/{n_int}  {reason}"
+            )
+            rows.append(
+                {
+                    "sort": overlap,
+                    "sub": sub,
+                    "mask": label,
+                    "overlap_pct": f"{overlap:.2f}",
+                    "dice_pct": f"{dice:.2f}",
+                    "n_new": str(n_new),
+                    "n_old": str(n_old),
+                    "n_intersect": str(n_int),
+                    "reason": reason,
+                    "new_path": str(new_path),
+                    "old_path": str(old_path),
+                }
+            )
 
-header_lines() {
-    echo "# new vs old gPPI seed overlap (threshold ${THRESH}%)"
-    echo "# overlap_pct = min(100*|intersect|/|new|, 100*|intersect|/|old|); Dice also reported"
-    echo "# sorted by overlap_pct descending (NA / missing last)"
-    echo "# NEW_ROOT=${NEW_ROOT}"
-    echo "# OLD_ROOT=${OLD_ROOT}"
-    echo "# date=$(date -Iseconds)"
-    printf '%s\n' $'sub\tmask\toverlap_pct\tdice_pct\tn_new\tn_old\tn_intersect\treason\tnew_path\told_path'
-}
+    rows.sort(key=lambda r: (-r["sort"], r["sub"], r["mask"]))
 
-SORTED="${_TMP}/sorted.tsv"
-# numeric descending on sort_key; strip the key
-sort -t $'\t' -k1,1nr -k2,2 "$ROWS" | cut -f2- >"$SORTED"
+    meta = [
+        "# new vs old gPPI seed overlap — ALL pairs, overlap descending (NA last)",
+        "# overlap_pct = min(100*|intersect|/|new|, 100*|intersect|/|old|)",
+        f"# reason=LOW_OVERLAP if overlap_pct < {THRESH:g}; OK otherwise",
+        f"# subjects={len(subjects)}  pairs={len(rows)}  ok={n_ok}  "
+        f"below_{THRESH:g}={n_low}  missing_old={n_missing}  "
+        f"grid={n_grid}  load_fail={n_fail}",
+        f"# NEW_ROOT={NEW_ROOT}",
+        f"# OLD_ROOT={OLD_ROOT}",
+        tsv_line(HEADER).rstrip("\n"),
+    ]
+    lines = list(meta)
+    for r in rows:
+        lines.append(tsv_line([r[k] for k in HEADER]).rstrip("\n"))
+    text = "\n".join(lines) + "\n"
+    ALL_OUT.write_text(text, encoding="utf-8")
+    LOW_OUT.write_text(text, encoding="utf-8")
 
-{
-    header_lines
-    cat "$SORTED"
-} >"$ALL_OUT"
+    log("")
+    log(
+        f">> subjects={len(subjects)}  pairs={len(rows)}  ok={n_ok}  "
+        f"below_{THRESH:g}={n_low}  missing_old={n_missing}  "
+        f"grid={n_grid}  load_fail={n_fail}"
+    )
+    log(f">> wrote ALL overlaps (desc) to:")
+    log(f"   {LOW_OUT}")
+    log(f"   {ALL_OUT}")
+    log(f">> grep lows:  grep LOW_OVERLAP {LOW_OUT}")
+    if not rows:
+        log("ERROR: no comparison rows")
+        return 1
+    return 0
 
-{
-    header_lines
-    awk -F '\t' -v t="$THRESH" '
-        $8 == "LOW_OVERLAP" {print; next}
-        $3 == "NA" {print; next}
-        ($3+0) < (t+0) {print}
-    ' "$SORTED"
-} >"$LOW_OUT"
 
-echo
-echo ">> subjects=${n_subs}  pairs=${n_pairs}  ok=${n_ok}  low=<${THRESH}%:${n_low}  missing_old=${n_missing}  grid=${n_grid}  no_new_masks=${n_nomask}"
-echo ">> all overlaps (desc): $ALL_OUT"
-echo ">> low overlap:         $LOW_OUT"
-if [ ! -s "$ROWS" ]; then
-    echo "ERROR: no comparison rows were written (discovery or FSL step produced nothing)" >&2
-    exit 1
-fi
+if __name__ == "__main__":
+    raise SystemExit(main())
+PY
