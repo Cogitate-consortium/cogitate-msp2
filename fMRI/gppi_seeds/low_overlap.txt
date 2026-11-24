@@ -1,0 +1,6 @@
+# new vs old gPPI seed overlap (threshold 95%)
+# overlap_pct = min(100*|∩|/|new|, 100*|∩|/|old|); Dice also reported
+# NEW_ROOT=/wishData/cogitate-data/fMRI/bids/derivatives/exclude/new/gppi_seeds
+# OLD_ROOT=/wishData/cogitate-data/fMRI/bids/derivatives/exclude/old/gppi_seeds
+# date=2026-11-24T20:34:00+02:00
+sub	mask	overlap_pct	dice_pct	n_new	n_old	n_intersect	reason	new_path	old_path
