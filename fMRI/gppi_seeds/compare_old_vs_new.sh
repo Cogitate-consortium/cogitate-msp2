@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # Compare new vs old gPPI seed masks (FFA/LOC NIfTI) per subject.
 #
-# Overlap = min(100*|intersect|/|new|, 100*|intersect|/|old|) on binary voxels.
+# Overlap = min(100*|intersect|/|new|, 100*|intersect|/|old|) on binary voxels
+# in the same voxel grid (after squeezing trailing singleton dimensions).
+# If several old files share a filename, each is compared and the LOWEST
+# overlap is kept (avoids matching a copy of the new mask inside old/).
+#
 # Writes ALL pairs (overlap descending) to low_overlap.txt and all_overlap.txt.
 #
-# Uses Python/nibabel (no FSL). Run inside cogitate_fmri:
-#   python3 -u compare_old_vs_new.sh
+# Uses Python/nibabel (no FSL). Inside cogitate_fmri:
 #   bash compare_old_vs_new.sh
 
 set -euo pipefail
@@ -41,6 +44,7 @@ LOW_OUT = Path(os.environ["LOW_OUT"])
 THRESH = float(os.environ["THRESH"])
 
 SUB_RE = re.compile(r"(sub-[A-Za-z0-9]+)")
+AFFINE_ATOL = 1e-4
 
 
 def log(msg: str) -> None:
@@ -85,11 +89,27 @@ def prefer_gz(paths: list[Path]) -> Path:
     return paths[0]
 
 
-def index_by_stem(root: Path) -> dict[str, Path]:
-    buckets: dict[str, list[Path]] = {}
+def unique_resolved(paths: list[Path]) -> list[Path]:
+    seen: set[str] = set()
+    out: list[Path] = []
+    for p in paths:
+        key = str(p.resolve())
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
+    return out
+
+
+def index_by_stem(root: Path) -> dict[str, list[Path]]:
+    """All NIfTIs per filename stem. .nii and .nii.gz in the same folder count once."""
+    groups: dict[tuple[str, str], list[Path]] = {}
     for p in iter_niftis(root):
-        buckets.setdefault(stem_of(p), []).append(p)
-    return {stem: prefer_gz(ps) for stem, ps in buckets.items()}
+        groups.setdefault((str(p.parent), stem_of(p)), []).append(p)
+    buckets: dict[str, list[Path]] = {}
+    for (_parent, stem), ps in groups.items():
+        buckets.setdefault(stem, []).append(prefer_gz(ps))
+    return {stem: unique_resolved(ps) for stem, ps in buckets.items()}
 
 
 def mask_label(stem: str) -> str:
@@ -100,10 +120,24 @@ def mask_label(stem: str) -> str:
     return stem
 
 
-def load_binary(path: Path) -> tuple[np.ndarray, tuple[int, ...]]:
+def load_mask(path: Path) -> tuple[np.ndarray, np.ndarray]:
     img = nib.load(str(path))
-    data = np.asanyarray(img.dataobj)
-    return data != 0, tuple(int(x) for x in data.shape)
+    data = np.squeeze(np.asanyarray(img.dataobj))
+    binary = np.asarray(data != 0, dtype=bool)
+    return binary, np.asarray(img.affine, dtype=np.float64)
+
+
+def overlap_stats(new_bin: np.ndarray, old_bin: np.ndarray) -> tuple[float, float, int, int, int, int, int]:
+    n_new = int(new_bin.sum())
+    n_old = int(old_bin.sum())
+    n_int = int(np.logical_and(new_bin, old_bin).sum())
+    n_only_new = int(np.logical_and(new_bin, np.logical_not(old_bin)).sum())
+    n_only_old = int(np.logical_and(old_bin, np.logical_not(new_bin)).sum())
+    pct_new = (100.0 * n_int / n_new) if n_new else 0.0
+    pct_old = (100.0 * n_int / n_old) if n_old else 0.0
+    overlap = min(pct_new, pct_old)
+    dice = (200.0 * n_int / (n_new + n_old)) if (n_new + n_old) else 0.0
+    return overlap, dice, n_new, n_old, n_int, n_only_new, n_only_old
 
 
 def tsv_line(fields: list[str]) -> str:
@@ -118,6 +152,9 @@ HEADER = [
     "n_new",
     "n_old",
     "n_intersect",
+    "n_only_new",
+    "n_only_old",
+    "n_old_files",
     "reason",
     "new_path",
     "old_path",
@@ -136,10 +173,19 @@ def main() -> int:
     old_index = index_by_stem(OLD_ROOT)
     log(f">> new: {NEW_ROOT}")
     log(f">> old: {OLD_ROOT}")
-    log(f">> unique mask stems: new={len(new_index)}  old={len(old_index)}")
+    log(
+        f">> unique mask stems: new={len(new_index)}  old={len(old_index)}  "
+        f"old_files={sum(len(v) for v in old_index.values())}"
+    )
+    n_dup = sum(1 for v in old_index.values() if len(v) > 1)
+    if n_dup:
+        log(f">> WARN: {n_dup} old filename(s) appear in more than one folder; using lowest overlap")
 
     by_sub: dict[str, list[tuple[str, Path]]] = {}
-    for stem, path in sorted(new_index.items()):
+    for stem, paths in sorted(new_index.items()):
+        if len(paths) != 1:
+            log(f"WARN: {len(paths)} new files for stem {stem}; using {paths[0]}")
+        path = paths[0]
         m = SUB_RE.search(path.name)
         if not m:
             log(f"WARN: skip (no sub-* in name): {path}")
@@ -152,17 +198,23 @@ def main() -> int:
         log("ERROR: no sub-* NIfTI masks under NEW_ROOT")
         return 1
 
-    rows: list[dict[str, str]] = []
-    n_ok = n_low = n_missing = n_grid = n_fail = 0
+    rows: list[dict[str, object]] = []
+    n_ok = n_low = n_missing = n_grid = n_fail = n_same = 0
 
     for i_sub, sub in enumerate(subjects, start=1):
         pairs = by_sub[sub]
         log(f">> [{i_sub}/{len(subjects)}] {sub}  masks={len(pairs)}")
         for stem, new_path in pairs:
             label = mask_label(stem)
-            old_path = old_index.get(stem)
-            if old_path is None:
-                log(f"   {label}  MISSING_OLD  {new_path.name}")
+            new_res = new_path.resolve()
+            old_cands = [
+                p
+                for p in old_index.get(stem, [])
+                if p.resolve() != new_res
+            ]
+            if not old_cands:
+                reason = "MISSING_OLD"
+                log(f"   {label}  {reason}  {new_path.name}")
                 rows.append(
                     {
                         "sort": -1.0,
@@ -173,7 +225,10 @@ def main() -> int:
                         "n_new": "NA",
                         "n_old": "NA",
                         "n_intersect": "NA",
-                        "reason": "MISSING_OLD",
+                        "n_only_new": "NA",
+                        "n_only_old": "NA",
+                        "n_old_files": "0",
+                        "reason": reason,
                         "new_path": str(new_path),
                         "old_path": "",
                     }
@@ -181,12 +236,10 @@ def main() -> int:
                 n_missing += 1
                 continue
 
-            log(f"   {label}  loading {new_path.name}")
             try:
-                new_bin, new_shape = load_binary(new_path)
-                old_bin, old_shape = load_binary(old_path)
+                new_bin, new_aff = load_mask(new_path)
             except Exception as exc:
-                log(f"   {label}  LOAD_FAILED  {exc}")
+                log(f"   {label}  LOAD_FAILED new  {exc}")
                 rows.append(
                     {
                         "sort": -1.0,
@@ -197,82 +250,161 @@ def main() -> int:
                         "n_new": "NA",
                         "n_old": "NA",
                         "n_intersect": "NA",
+                        "n_only_new": "NA",
+                        "n_only_old": "NA",
+                        "n_old_files": str(len(old_cands)),
                         "reason": f"LOAD_FAILED {exc}",
                         "new_path": str(new_path),
-                        "old_path": str(old_path),
+                        "old_path": str(old_cands[0]),
                     }
                 )
                 n_fail += 1
                 continue
 
-            if new_shape != old_shape:
-                log(f"   {label}  GRID_MISMATCH  {new_shape} vs {old_shape}")
-                rows.append(
+            cand_rows: list[dict[str, object]] = []
+            for old_path in old_cands:
+                try:
+                    old_bin, old_aff = load_mask(old_path)
+                except Exception as exc:
+                    log(f"   {label}  LOAD_FAILED old {old_path}  {exc}")
+                    continue
+                if new_bin.shape != old_bin.shape:
+                    cand_rows.append(
+                        {
+                            "sort": -1.0,
+                            "overlap_pct": "NA",
+                            "dice_pct": "NA",
+                            "n_new": str(int(new_bin.sum())),
+                            "n_old": str(int(old_bin.sum())),
+                            "n_intersect": "NA",
+                            "n_only_new": "NA",
+                            "n_only_old": "NA",
+                            "reason": f"GRID_MISMATCH {tuple(new_bin.shape)} vs {tuple(old_bin.shape)}",
+                            "old_path": str(old_path),
+                            "identical": False,
+                        }
+                    )
+                    continue
+                if not np.allclose(new_aff, old_aff, atol=AFFINE_ATOL, rtol=0):
+                    cand_rows.append(
+                        {
+                            "sort": -1.0,
+                            "overlap_pct": "NA",
+                            "dice_pct": "NA",
+                            "n_new": str(int(new_bin.sum())),
+                            "n_old": str(int(old_bin.sum())),
+                            "n_intersect": "NA",
+                            "n_only_new": "NA",
+                            "n_only_old": "NA",
+                            "reason": "AFFINE_MISMATCH",
+                            "old_path": str(old_path),
+                            "identical": False,
+                        }
+                    )
+                    continue
+                ov, dice, n_new, n_old, n_int, n_only_new, n_only_old = overlap_stats(
+                    new_bin, old_bin
+                )
+                identical = n_only_new == 0 and n_only_old == 0
+                cand_rows.append(
                     {
-                        "sort": -1.0,
-                        "sub": sub,
-                        "mask": label,
-                        "overlap_pct": "NA",
-                        "dice_pct": "NA",
-                        "n_new": "NA",
-                        "n_old": "NA",
-                        "n_intersect": "NA",
-                        "reason": f"GRID_MISMATCH {new_shape} vs {old_shape}",
-                        "new_path": str(new_path),
+                        "sort": ov,
+                        "overlap_pct": f"{ov:.2f}",
+                        "dice_pct": f"{dice:.2f}",
+                        "n_new": str(n_new),
+                        "n_old": str(n_old),
+                        "n_intersect": str(n_int),
+                        "n_only_new": str(n_only_new),
+                        "n_only_old": str(n_only_old),
+                        "reason": "IDENTICAL" if identical else ("LOW_OVERLAP" if ov < THRESH else "OK"),
                         "old_path": str(old_path),
+                        "identical": identical,
                     }
                 )
-                n_grid += 1
+
+            if not cand_rows:
+                log(f"   {label}  LOAD_FAILED all old candidates")
+                n_fail += 1
                 continue
 
-            n_new = int(new_bin.sum())
-            n_old = int(old_bin.sum())
-            n_int = int(np.logical_and(new_bin, old_bin).sum())
-            pct_new = (100.0 * n_int / n_new) if n_new else 0.0
-            pct_old = (100.0 * n_int / n_old) if n_old else 0.0
-            overlap = min(pct_new, pct_old)
-            dice = (200.0 * n_int / (n_new + n_old)) if (n_new + n_old) else 0.0
-            reason = "LOW_OVERLAP" if overlap < THRESH else "OK"
-            if reason == "LOW_OVERLAP":
+            numeric = [c for c in cand_rows if c["sort"] != -1.0]
+            if numeric:
+                best = min(numeric, key=lambda c: c["sort"])
+            else:
+                best = cand_rows[0]
+
+            reason = str(best["reason"])
+            if len(old_cands) > 1:
+                ovs = ",".join(
+                    ("IDENTICAL" if c["identical"] else str(c["overlap_pct"]))
+                    for c in cand_rows
+                )
+                log(
+                    f"   {label}  {len(old_cands)} old files for this name; "
+                    f"keeping lowest overlap; candidates={ovs}"
+                )
+                if reason in {"OK", "IDENTICAL", "LOW_OVERLAP"}:
+                    reason = f"{reason};DUPLICATE_OLD"
+
+            if "GRID_MISMATCH" in str(best["reason"]):
+                n_grid += 1
+            elif "AFFINE_MISMATCH" in str(best["reason"]):
+                n_grid += 1
+            elif best["identical"]:
+                n_same += 1
+                n_ok += 1
+            elif best["sort"] == -1.0:
+                n_fail += 1
+            elif float(best["sort"]) < THRESH:
                 n_low += 1
+                reason = reason.replace("OK;", "LOW_OVERLAP;")
+                if reason == "OK":
+                    reason = "LOW_OVERLAP"
             else:
                 n_ok += 1
+
             log(
-                f"   {label}  {overlap:.2f}%  dice={dice:.2f}  "
-                f"n={n_new}/{n_old}/{n_int}  {reason}"
+                f"   {label}  {best['overlap_pct']}%  dice={best['dice_pct']}  "
+                f"n={best['n_new']}/{best['n_old']}/{best['n_intersect']}  "
+                f"only_new={best['n_only_new']} only_old={best['n_only_old']}  "
+                f"{reason}"
             )
             rows.append(
                 {
-                    "sort": overlap,
+                    "sort": best["sort"],
                     "sub": sub,
                     "mask": label,
-                    "overlap_pct": f"{overlap:.2f}",
-                    "dice_pct": f"{dice:.2f}",
-                    "n_new": str(n_new),
-                    "n_old": str(n_old),
-                    "n_intersect": str(n_int),
+                    "overlap_pct": best["overlap_pct"],
+                    "dice_pct": best["dice_pct"],
+                    "n_new": best["n_new"],
+                    "n_old": best["n_old"],
+                    "n_intersect": best["n_intersect"],
+                    "n_only_new": best["n_only_new"],
+                    "n_only_old": best["n_only_old"],
+                    "n_old_files": str(len(old_cands)),
                     "reason": reason,
                     "new_path": str(new_path),
-                    "old_path": str(old_path),
+                    "old_path": best["old_path"],
                 }
             )
 
-    rows.sort(key=lambda r: (-r["sort"], r["sub"], r["mask"]))
+    rows.sort(key=lambda r: (-float(r["sort"]), str(r["sub"]), str(r["mask"])))
 
     meta = [
         "# new vs old gPPI seed overlap — ALL pairs, overlap descending (NA last)",
         "# overlap_pct = min(100*|intersect|/|new|, 100*|intersect|/|old|)",
-        f"# reason=LOW_OVERLAP if overlap_pct < {THRESH:g}; OK otherwise",
-        f"# subjects={len(subjects)}  pairs={len(rows)}  ok={n_ok}  "
-        f"below_{THRESH:g}={n_low}  missing_old={n_missing}  "
-        f"grid={n_grid}  load_fail={n_fail}",
+        "# n_only_new / n_only_old = voxels in one mask but not the other",
+        "# if several old files share a name, the LOWEST overlap is kept",
+        f"# reason=LOW_OVERLAP if overlap_pct < {THRESH:g}; IDENTICAL if arrays match",
+        f"# subjects={len(subjects)}  pairs={len(rows)}  ok={n_ok}  identical={n_same}  "
+        f"below_{THRESH:g}={n_low}  missing_old={n_missing}  grid={n_grid}  fail={n_fail}",
         f"# NEW_ROOT={NEW_ROOT}",
         f"# OLD_ROOT={OLD_ROOT}",
         tsv_line(HEADER).rstrip("\n"),
     ]
     lines = list(meta)
     for r in rows:
-        lines.append(tsv_line([r[k] for k in HEADER]).rstrip("\n"))
+        lines.append(tsv_line([str(r[k]) for k in HEADER]).rstrip("\n"))
     text = "\n".join(lines) + "\n"
     ALL_OUT.write_text(text, encoding="utf-8")
     LOW_OUT.write_text(text, encoding="utf-8")
@@ -280,10 +412,10 @@ def main() -> int:
     log("")
     log(
         f">> subjects={len(subjects)}  pairs={len(rows)}  ok={n_ok}  "
-        f"below_{THRESH:g}={n_low}  missing_old={n_missing}  "
-        f"grid={n_grid}  load_fail={n_fail}"
+        f"identical={n_same}  below_{THRESH:g}={n_low}  "
+        f"missing_old={n_missing}  grid={n_grid}  fail={n_fail}"
     )
-    log(f">> wrote ALL overlaps (desc) to:")
+    log(">> wrote ALL overlaps (desc) to:")
     log(f"   {LOW_OUT}")
     log(f"   {ALL_OUT}")
     log(f">> grep lows:  grep LOW_OVERLAP {LOW_OUT}")
