@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Compare new vs old gPPI seed masks (FFA/LOC NIfTI) per subject.
 #
-# For each sub-* under NEW_ROOT, load that subject's seed masks and compute
-# overlap with the matching filename under OLD_ROOT. Overlap is the smaller of
+# Overlap is the smaller of
 #   100 * |new ∩ old| / |new|
 #   100 * |new ∩ old| / |old|
-# (binary voxels). Pairs below THRESH percent, plus missing/failed pairs, are
-# written to low_overlap.txt next to this script.
+# (binary voxels).
+#
+# Writes:
+#   all_overlap.txt   every pair, overlap descending (NA / missing last)
+#   low_overlap.txt   pairs with overlap < THRESH, same order
 #
 # Needs FSL (fslmaths, fslstats). On Wish:  module load fsl/6.0.7.23
 
@@ -16,7 +18,8 @@ _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 NEW_ROOT="${NEW_ROOT:-/wishData/cogitate-data/fMRI/bids/derivatives/exclude/new/gppi_seeds}"
 OLD_ROOT="${OLD_ROOT:-/wishData/cogitate-data/fMRI/bids/derivatives/exclude/old/gppi_seeds}"
-OUT="${OUT:-${_SCRIPT_DIR}/low_overlap.txt}"
+ALL_OUT="${ALL_OUT:-${_SCRIPT_DIR}/all_overlap.txt}"
+LOW_OUT="${LOW_OUT:-${_SCRIPT_DIR}/low_overlap.txt}"
 THRESH="${THRESH:-95}"
 
 if ! command -v fslmaths >/dev/null 2>&1 || ! command -v fslstats >/dev/null 2>&1; then
@@ -35,6 +38,7 @@ fi
 
 _TMP="$(mktemp -d "${TMPDIR:-/tmp}/gppi_seed_overlap.XXXXXX")"
 trap 'rm -rf "$_TMP"' EXIT
+ROWS="${_TMP}/rows.tsv"
 
 stem_of() {
     local f="$1"
@@ -45,20 +49,53 @@ stem_of() {
     printf '%s' "$b"
 }
 
+nifti_list() {
+    find "$1" -type f \( -name '*.nii.gz' -o -name '*.nii' \) ! -name '*timecourse*' | sort
+}
+
+# Unique sub-* ids from directory names and from NIfTI basenames.
+list_subjects() {
+    local root="$1"
+    local d f base
+    while IFS= read -r d; do
+        [ -n "$d" ] || continue
+        basename "$d"
+    done < <(find "$root" -type d -name 'sub-*' | sort)
+    while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        base="$(basename "$f")"
+        if [[ "$base" =~ ^(sub-[A-Za-z0-9]+) ]]; then
+            printf '%s\n' "${BASH_REMATCH[1]}"
+        fi
+    done < <(nifti_list "$root")
+}
+
 # Prefer .nii.gz when both uncompressed and gzipped copies exist.
 list_masks() {
     local root="$1"
-    local seen_gz=""
-    local f stem
-    if [ ! -d "$root" ]; then
-        return 0
-    fi
+    local sub="$2"
+    local seen_gz="" f stem
+    local files="${_TMP}/masks_${sub}.txt"
+    : >"$files"
+    nifti_list "$root" | while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        base="$(basename "$f")"
+        case "$base" in
+            "${sub}"_*) printf '%s\n' "$f" ;;
+            *)
+                case "$f" in
+                    */"${sub}"/*) printf '%s\n' "$f" ;;
+                esac
+                ;;
+        esac
+    done | sort -u >"$files"
+
     while IFS= read -r f; do
         [ -n "$f" ] || continue
         case "$f" in
             *.nii.gz) seen_gz="${seen_gz}$(stem_of "$f")"$'\n' ;;
         esac
-    done < <(find "$root" -type f \( -name '*.nii.gz' -o -name '*.nii' \) ! -name '*timecourse*' | sort)
+    done <"$files"
 
     while IFS= read -r f; do
         [ -n "$f" ] || continue
@@ -69,23 +106,16 @@ list_masks() {
             fi
         fi
         printf '%s\n' "$f"
-    done < <(find "$root" -type f \( -name '*.nii.gz' -o -name '*.nii' \) ! -name '*timecourse*' | sort)
+    done <"$files"
 }
 
 find_old_mask() {
-    local sub="$1"
-    local stem="$2"
-    local sub_dir="${OLD_ROOT}/${sub}"
-    local hits
-    if [ ! -d "$sub_dir" ]; then
-        return 1
-    fi
-    hits="$(find "$sub_dir" -type f \( -name "${stem}.nii.gz" -o -name "${stem}.nii" \) | sort)"
+    local stem="$1"
+    local hits gz
+    hits="$(find "$OLD_ROOT" -type f \( -name "${stem}.nii.gz" -o -name "${stem}.nii" \) | sort || true)"
     if [ -z "$hits" ]; then
         return 1
     fi
-    # Prefer gzipped
-    local gz
     gz="$(printf '%s\n' "$hits" | grep '\.nii\.gz$' | head -n 1 || true)"
     if [ -n "$gz" ]; then
         printf '%s' "$gz"
@@ -95,7 +125,6 @@ find_old_mask() {
 }
 
 fsl_nvox() {
-    # fslstats -V: "<nvoxels> <volume_mm3>"
     fslstats "$1" -V | awk '{printf "%d", $1+0}'
 }
 
@@ -105,49 +134,56 @@ fsl_dims() {
     fslval "$1" dim3
 }
 
-record_low() {
-    printf '%s\n' "$1" >>"$OUT"
+# sort_key <tab> sub mask overlap dice n_new n_old n_int reason new_path old_path
+record_row() {
+    local sort_key="$1"
+    shift
+    local IFS=$'\t'
+    printf '%s\t%s\n' "$sort_key" "$*" >>"$ROWS"
 }
 
-: >"$OUT"
-{
-    echo "# new vs old gPPI seed overlap (threshold ${THRESH}%)"
-    echo "# overlap_pct = min(100*|∩|/|new|, 100*|∩|/|old|); Dice also reported"
-    echo "# NEW_ROOT=${NEW_ROOT}"
-    echo "# OLD_ROOT=${OLD_ROOT}"
-    echo "# date=$(date -Iseconds)"
-    echo "sub	mask	overlap_pct	dice_pct	n_new	n_old	n_intersect	reason	new_path	old_path"
-} >>"$OUT"
-
-n_subs=0
-n_pairs=0
-n_low=0
-n_ok=0
-n_missing=0
-n_grid=0
+n_new_nii="$(nifti_list "$NEW_ROOT" | wc -l | tr -d ' ')"
+n_old_nii="$(nifti_list "$OLD_ROOT" | wc -l | tr -d ' ')"
 
 echo ">> new: $NEW_ROOT"
 echo ">> old: $OLD_ROOT"
-echo ">> write pairs with overlap < ${THRESH}% to: $OUT"
+echo ">> NIfTI files: new=${n_new_nii}  old=${n_old_nii}"
+echo ">> listing NEW_ROOT:"
+ls -la "$NEW_ROOT" | head -n 30
+if [ "$n_new_nii" -eq 0 ]; then
+    echo "ERROR: no .nii/.nii.gz masks under NEW_ROOT" >&2
+    exit 1
+fi
+
+mapfile -t SUBJECTS < <(list_subjects "$NEW_ROOT" | sort -u)
+n_subs=${#SUBJECTS[@]}
+echo ">> subjects found: ${n_subs}"
+printf '   %s\n' "${SUBJECTS[@]}"
 echo
 
-printf '%-12s %-8s %10s %10s %8s %8s %8s  %s\n' \
-    "sub" "mask" "overlap%" "dice%" "n_new" "n_old" "n_int" "status"
+if [ "$n_subs" -eq 0 ]; then
+    echo "ERROR: no sub-* ids under $NEW_ROOT" >&2
+    exit 1
+fi
 
-shopt -s nullglob
-for sub_dir in "${NEW_ROOT}"/sub-*; do
-    [ -d "$sub_dir" ] || continue
-    sub="$(basename "$sub_dir")"
-    n_subs=$((n_subs + 1))
+: >"$ROWS"
+n_pairs=0
+n_ok=0
+n_low=0
+n_missing=0
+n_grid=0
+n_nomask=0
 
-    mapfile -t new_masks < <(list_masks "$sub_dir")
+for sub in "${SUBJECTS[@]}"; do
+    echo ">> ${sub}"
+    mapfile -t new_masks < <(list_masks "$NEW_ROOT" "$sub")
     if [ ${#new_masks[@]} -eq 0 ]; then
-        echo "WARN: no NIfTI masks under $sub_dir" >&2
-        record_low "$(printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' \
-            "$sub" "ALL" "NA" "NA" "NA" "NA" "NA" "NO_NEW_MASKS" "$sub_dir" "")"
-        n_low=$((n_low + 1))
+        echo "   WARN: no NIfTI masks for ${sub}" >&2
+        record_row "-1" "$sub" "ALL" "NA" "NA" "NA" "NA" "NA" "NO_NEW_MASKS" "" ""
+        n_nomask=$((n_nomask + 1))
         continue
     fi
+    echo "   masks: ${#new_masks[@]}"
 
     for new_nii in "${new_masks[@]}"; do
         n_pairs=$((n_pairs + 1))
@@ -159,25 +195,19 @@ for sub_dir in "${NEW_ROOT}"/sub-*; do
         esac
 
         old_nii=""
-        if ! old_nii="$(find_old_mask "$sub" "$stem")"; then
-            printf '%-12s %-8s %10s %10s %8s %8s %8s  %s\n' \
-                "$sub" "$mask_label" "NA" "NA" "?" "?" "?" "MISSING_OLD"
-            record_low "$(printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' \
-                "$sub" "$mask_label" "NA" "NA" "NA" "NA" "NA" "MISSING_OLD" "$new_nii" "")"
+        if ! old_nii="$(find_old_mask "$stem")"; then
+            echo "   ${mask_label}  MISSING_OLD  $(basename "$new_nii")"
+            record_row "-1" "$sub" "$mask_label" "NA" "NA" "NA" "NA" "NA" "MISSING_OLD" "$new_nii" ""
             n_missing=$((n_missing + 1))
-            n_low=$((n_low + 1))
             continue
         fi
 
         new_dims="$(fsl_dims "$new_nii" | tr -d '\n' | tr -s ' ')"
         old_dims="$(fsl_dims "$old_nii" | tr -d '\n' | tr -s ' ')"
         if [ "$new_dims" != "$old_dims" ]; then
-            printf '%-12s %-8s %10s %10s %8s %8s %8s  %s\n' \
-                "$sub" "$mask_label" "NA" "NA" "?" "?" "?" "GRID_MISMATCH"
-            record_low "$(printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' \
-                "$sub" "$mask_label" "NA" "NA" "NA" "NA" "NA" "GRID_MISMATCH ${new_dims} vs ${old_dims}" "$new_nii" "$old_nii")"
+            echo "   ${mask_label}  GRID_MISMATCH  ${new_dims} vs ${old_dims}"
+            record_row "-1" "$sub" "$mask_label" "NA" "NA" "NA" "NA" "NA" "GRID_MISMATCH ${new_dims} vs ${old_dims}" "$new_nii" "$old_nii"
             n_grid=$((n_grid + 1))
-            n_low=$((n_low + 1))
             continue
         fi
 
@@ -204,24 +234,49 @@ for sub_dir in "${NEW_ROOT}"/sub-*; do
         below="$(awk -v p="$overlap_pct" -v t="$THRESH" 'BEGIN{print (p+0 < t+0) ? 1 : 0}')"
         if [ "$below" -eq 1 ]; then
             status="LOW_OVERLAP"
-            printf '%-12s %-8s %10s %10s %8s %8s %8s  %s\n' \
-                "$sub" "$mask_label" "$overlap_pct" "$dice_pct" "$n_new" "$n_old" "$n_int" "$status"
-            record_low "$(printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' \
-                "$sub" "$mask_label" "$overlap_pct" "$dice_pct" "$n_new" "$n_old" "$n_int" "$status" "$new_nii" "$old_nii")"
             n_low=$((n_low + 1))
         else
             status="OK"
-            printf '%-12s %-8s %10s %10s %8s %8s %8s  %s\n' \
-                "$sub" "$mask_label" "$overlap_pct" "$dice_pct" "$n_new" "$n_old" "$n_int" "$status"
             n_ok=$((n_ok + 1))
         fi
+        echo "   ${mask_label}  ${overlap_pct}%  dice=${dice_pct}  n=${n_new}/${n_old}/${n_int}  ${status}"
+        record_row "$overlap_pct" "$sub" "$mask_label" "$overlap_pct" "$dice_pct" "$n_new" "$n_old" "$n_int" "$status" "$new_nii" "$old_nii"
     done
 done
 
+header_lines() {
+    echo "# new vs old gPPI seed overlap (threshold ${THRESH}%)"
+    echo "# overlap_pct = min(100*|intersect|/|new|, 100*|intersect|/|old|); Dice also reported"
+    echo "# sorted by overlap_pct descending (NA / missing last)"
+    echo "# NEW_ROOT=${NEW_ROOT}"
+    echo "# OLD_ROOT=${OLD_ROOT}"
+    echo "# date=$(date -Iseconds)"
+    printf '%s\n' $'sub\tmask\toverlap_pct\tdice_pct\tn_new\tn_old\tn_intersect\treason\tnew_path\told_path'
+}
+
+SORTED="${_TMP}/sorted.tsv"
+# numeric descending on sort_key; strip the key
+sort -t $'\t' -k1,1nr -k2,2 "$ROWS" | cut -f2- >"$SORTED"
+
+{
+    header_lines
+    cat "$SORTED"
+} >"$ALL_OUT"
+
+{
+    header_lines
+    awk -F '\t' -v t="$THRESH" '
+        $8 == "LOW_OVERLAP" {print; next}
+        $3 == "NA" {print; next}
+        ($3+0) < (t+0) {print}
+    ' "$SORTED"
+} >"$LOW_OUT"
+
 echo
-if [ "$n_subs" -eq 0 ]; then
-    echo "ERROR: no sub-* directories in $NEW_ROOT" >&2
+echo ">> subjects=${n_subs}  pairs=${n_pairs}  ok=${n_ok}  low=<${THRESH}%:${n_low}  missing_old=${n_missing}  grid=${n_grid}  no_new_masks=${n_nomask}"
+echo ">> all overlaps (desc): $ALL_OUT"
+echo ">> low overlap:         $LOW_OUT"
+if [ ! -s "$ROWS" ]; then
+    echo "ERROR: no comparison rows were written (discovery or FSL step produced nothing)" >&2
     exit 1
 fi
-echo ">> subjects=${n_subs}  pairs=${n_pairs}  ok=${n_ok}  written_to_low_overlap=${n_low} (missing_old=${n_missing} grid_mismatch=${n_grid})"
-echo ">> low-overlap file: $OUT"
