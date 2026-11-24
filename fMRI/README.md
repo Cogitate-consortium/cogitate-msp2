@@ -8,7 +8,7 @@ Run pipelines **in the order listed under [Analysis Pipeline](#analysis-pipeline
 
 ## System requirements
 
-### Operating system
+### Operating systems
 
 - **Linux** (bash + SLURM job scripts). Analyses were developed and run on an HPC Linux cluster (CentOS-compatible module environment). macOS/Windows are not supported for the FEAT / SLURM pipelines.
 
