@@ -7,6 +7,9 @@
 # Usage:
 #   bash check_2nd_level_status.sh
 #
+# If some jobs are FEAT_OK with start/finish timestamps, prints an ETA for
+# QUEUED + RUNNING using median duration and GPPI_NJOBS (default 8).
+#
 # Writes job_files/run_PPI_2nd_level/_2nd_level_status.tsv
 
 set -euo pipefail
@@ -20,6 +23,7 @@ GPPI_CODE_ROOT="${_SCRIPT_DIR}"
 JOB_FILES_ROOT="${GPPI_CODE_ROOT}/job_files/run_PPI_2nd_level"
 OUT_TSV="${JOB_FILES_ROOT}/_2nd_level_status.tsv"
 FSLFEAT_ROOT="${BIDS_ROOT}/derivatives/fslFeat/gPPI_AT-seen-go"
+GPPI_NJOBS="${GPPI_NJOBS:-8}"
 
 if [ ! -f "$SUBJECT_CSV" ]; then
     echo "ERROR: subject CSV not found: $SUBJECT_CSV" >&2
@@ -210,3 +214,92 @@ elif [ "$n_none" -gt 40 ]; then
     echo
     echo "---- not queued (${n_none}) — omitted (see TSV) ----"
 fi
+
+OUT_TSV="$OUT_TSV" GPPI_NJOBS="$GPPI_NJOBS" python3 <<'PY'
+import datetime as dt
+import os
+import re
+import statistics
+import sys
+from pathlib import Path
+
+tsv = Path(os.environ["OUT_TSV"])
+nslot = max(1, int(os.environ.get("GPPI_NJOBS", "8")))
+start_re = re.compile(r"job start (\S+)")
+fin_re = re.compile(r"job finished (\S+)")
+now = dt.datetime.now().astimezone()
+
+durs = []
+running_elapsed = []
+n_queue = 0
+n_running = 0
+
+if not tsv.is_file():
+    sys.exit(0)
+
+with tsv.open(encoding="utf-8", errors="replace") as fh:
+    next(fh, None)
+    for line in fh:
+        parts = line.rstrip("\n").split("\t")
+        if len(parts) < 6:
+            continue
+        bucket, marker = parts[0], Path(parts[5])
+        if bucket == "QUEUED":
+            n_queue += 1
+            continue
+        if not marker.is_file():
+            continue
+        text = marker.read_text(encoding="utf-8", errors="replace")
+        sm, fm = start_re.search(text), fin_re.search(text)
+        if bucket == "OK" and sm and fm:
+            try:
+                t0 = dt.datetime.fromisoformat(sm.group(1))
+                t1 = dt.datetime.fromisoformat(fm.group(1))
+            except ValueError:
+                continue
+            sec = (t1 - t0).total_seconds()
+            if sec > 0:
+                durs.append(sec)
+        elif bucket == "RUNNING":
+            n_running += 1
+            if sm:
+                try:
+                    t0 = dt.datetime.fromisoformat(sm.group(1))
+                except ValueError:
+                    continue
+                running_elapsed.append(max(0.0, (now - t0).total_seconds()))
+
+def fmt(seconds: float) -> str:
+    s = max(0, int(round(seconds)))
+    h, r = divmod(s, 3600)
+    m, sec = divmod(r, 60)
+    if h:
+        return f"{h}h {m:02d}m"
+    return f"{m}m {sec:02d}s"
+
+print()
+if not durs:
+    print(">> ETA: no finished jobs with start/finish timestamps yet")
+    sys.exit(0)
+
+med = statistics.median(durs)
+slots = max(1, min(nslot, n_queue + n_running) if (n_queue + n_running) else nslot)
+work = n_queue * med + sum(max(0.0, med - e) for e in running_elapsed)
+eta = work / slots
+finish_at = now + dt.timedelta(seconds=eta)
+print(
+    f">> ETA from {len(durs)} FEAT_OK job(s): "
+    f"median={fmt(med)}  min={fmt(min(durs))}  max={fmt(max(durs))}"
+)
+print(
+    f">> remaining: queued={n_queue}  running={n_running}  "
+    f"slots={slots} (GPPI_NJOBS={nslot})"
+)
+if n_queue + n_running == 0:
+    print(">> nothing left in queue/running")
+else:
+    print(f">> estimated remaining ≈ {fmt(eta)}  (around {finish_at.isoformat(timespec='minutes')})")
+    if len(durs) < 3:
+        print(">> (rough: fewer than 3 finished jobs)")
+PY
+
